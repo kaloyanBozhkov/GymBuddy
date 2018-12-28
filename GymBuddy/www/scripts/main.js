@@ -300,6 +300,14 @@ function closeAlert() {
 
 $(document).on("input", "#fatsCount, #proteinsCount, #carbsCount", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
+    if ($(this).val() > 500)
+        $(this).val(500);
+});
+
+$(document).on("input", "#gramsCount", function () {
+    $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
+    if ($(this).val() > 9999)
+        $(this).val(9999);
 });
 
 function setNewGoals(fats, carbs, proteins) {
@@ -392,18 +400,18 @@ $(document).on("focusout", "#foodName", function () {
 
 $(document).on("input", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
+    if ($(this).val().trim() == ".")
+        $(this).val("0.");
 });
 
 $(document).on("focusin", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
-    if ($(this).val().trim() == "0") {
+    if ($(this).val().trim() == "0")
         $(this).val("");
-    }
 });
 
 $(document).on("focusout", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
-    if ($(this).val().trim().length <= 0) {
+    if ($(this).val().trim().length <= 0)
         $(this).val("0");
-    }
 });
 
 $(document).on("click", "#addServing", function () {
@@ -447,6 +455,9 @@ $(document).on("click", "#setServingSize", function () { //AlertMsgToAppend butt
 
     if (!isEmpty(_singleDayServing)) {
         _singleDayServing.totalMacrosId = _totalMacros.day + "/" + _totalMacros.month + "/" + _totalMacros.year;
+        _singleDayServing.fats = _currentMacros.fats;
+        _singleDayServing.carbs = _currentMacros.carbs;
+        _singleDayServing.proteins = _currentMacros.proteins;
 
         localStorage.setItem("singleDayServing", JSON.stringify(_singleDayServing));
     }
@@ -527,7 +538,7 @@ function checkHistoryServings(weekDay, day, month, year) {
     var date = day + "/" + month + "/" + year;
     $("#caloriesCounterHistory").removeClass("hidden");
     $("#dayEntriesShownFor").html(displayDate).attr("day", day).attr("month", month).attr("year", year);
-    if (localStorage.getItem("historyTotalMacros") != null && localStorage.getItem("historyTotalMacros") != "undefined" && localStorage.getItem("historyTotalMacros").length > 2) {
+    if (!doesNotExist(localStorage.getItem("historyTotalMacros"))) {
         _historyTotalMacros = JSON.parse(localStorage.getItem("historyTotalMacros"));
     }
 }
@@ -728,6 +739,9 @@ $(document).on("click", "#removeEntryFromServings", function () {
     _currentMacros.proteins -= proteins;
     _currentMacros.carbs -= carbs;
     _currentMacros.fats -= fats;
+    _singleDayServing.proteins -= proteins;
+    _singleDayServing.carbs -= carbs;
+    _singleDayServing.fats -= fats;
     _singleDayServing.servings.splice(indexToRemove, 1);
     localStorage.setItem("currentMacros", JSON.stringify(_currentMacros));
     localStorage.setItem("singleDayServing", JSON.stringify(_singleDayServing));

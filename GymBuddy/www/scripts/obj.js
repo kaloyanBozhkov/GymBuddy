@@ -40,13 +40,15 @@ function calculateCalories() {
     return ((this.fats * 9) + (this.carbs + this.proteins) * 4);
 }
 
-function singleDayServing(day, month, year, totalMacrosId = null) {
+function singleDayServing(day, month, year, totalMacrosId = null, totalCarbs = null, totalFats = null, totalProteins = null) {
     this.day = day;
     this.month = month;
     this.year = year;
     this.totalMacrosId = totalMacros;
     this.servings = []; 
-
+    this.carbs = totalCarbs;
+    this.fats = totalFats;
+    this.proteins = totalProteins;
 }
 
 function getCurrentTime() {
