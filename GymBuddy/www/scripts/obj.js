@@ -59,7 +59,7 @@ function getCurrentTime() {
     time.year = date.getFullYear();
     time.hour = date.getHours();
     time.minutes = date.getMinutes();
-
+    time.weekDay = date.getDay(); //Sunday is 0, Monday is 1..
     return time;
 }
 

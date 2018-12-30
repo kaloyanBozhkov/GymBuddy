@@ -258,15 +258,15 @@ body *:not(.glyphicon) {
     height: 100%;
 }
 
-#barFats, #barFatsHistory {
+#barFats, #barFatsHistory, .fatsTable {
     background-color: #E96C66;
 }
 
-#barCarbs, #barCarbsHistory {
+#barCarbs, #barCarbsHistory, .carbsTable {
     background-color: #e5a877;
 }
 
-#barProteins, #barProteinsHistory {
+#barProteins, #barProteinsHistory, .proteinsTable {
     background-color: #9cc14d;
 }
 
@@ -517,11 +517,11 @@ body *:not(.glyphicon) {
 }
 
 .margin-bottom-10 {
-    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .margin-bottom-20 {
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .alertServings h3{
@@ -838,4 +838,109 @@ body *:not(.glyphicon) {
     width: 95%;
     margin: auto;
     padding: 10px;
+}
+
+#statsBox{
+    height: 230px;
+    width: 100%;
+}
+
+#calorieHeader{
+    left:0;
+    top:0;
+    bottom:0;
+    height: 100%;
+    width: 20px;
+    font-size: 14px;
+}
+
+#calorieIndex{
+    width: 40px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+#calorieIndex .child{
+    vertical-align: bottom;
+}
+
+#calorieIndex li{
+    height: 16.6%;
+}
+
+#calorieIndex p {
+    line-height: 10px;
+}
+
+#myDopeTable {
+    overflow: hidden;
+    width: calc(100% - 40px);
+    display: inline-block;
+    vertical-align: top;
+    height: 100%;
+    border-bottom: 1px solid #b5b0b2;
+    border-left: 1px solid #b5b0b2;
+}
+
+#myDopeTable > div {
+    width: 14.28%;
+    display: inline-block;
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+}
+
+#myDopeTable > div p {
+    font-size: 8px;
+}
+
+#myDopeTable > div:nth-of-type(1) {
+    left:0;
+}
+
+#myDopeTable > div:nth-of-type(2) {
+    left: 14.28%;
+}
+
+#myDopeTable > div:nth-of-type(3) {
+    left: 28.56%;
+}
+
+#myDopeTable > div:nth-of-type(4) {
+    left: 42.84%;
+}
+
+#myDopeTable > div:nth-of-type(5) {
+    left: 57.12%;
+}
+
+#myDopeTable > div:nth-of-type(6) {
+    left: 71.4%;
+}
+
+#myDopeTable > div:nth-of-type(7) {
+    left: 85.68%;
+}
+
+
+#myDopeTable > div > div {
+    width: 90%;
+    margin: 0 auto;
+    color: white;
+}
+
+
+#xAxisDays{
+    width: 100%;
+    padding-left: 40px;
+
+}
+
+#xAxisDays > p {
+    display: inline-block;
+    vertical-align: top;
+    width: 14.28%;
+    text-align: center;
+    font-size: 11px;
+    padding: 5px 0px;
 }

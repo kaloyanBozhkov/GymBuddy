@@ -86,6 +86,7 @@ function loadContent(what) {
                 var d = returnPastDate(1);
                 checkHistoryServings(d.getDay(), d.getDate(), d.getMonth() + 1, d.getFullYear());
                 updateOldBarWidths(d);
+                loadWeeklyStatsGraph();
                 localStorage.setItem("lastOpened", "macros");
             } else {//workouts
                 localStorage.setItem("lastOpened", "workouts");
@@ -322,8 +323,8 @@ function setNewGoals(fats, carbs, proteins) {
    
 
     localStorage.setItem("totalMacros", JSON.stringify(_totalMacros));
-    
-    if (localStorage.getItem("historyTotalMacros") != null && localStorage.getItem("historyTotalMacros") != "undefined" && localStorage.getItem("historyTotalMacros").length > 2) {
+
+    if (!doesNotExist(localStorage.getItem("historyTotalMacros"))) {
         _historyTotalMacros = JSON.parse(localStorage.getItem("historyTotalMacros"));
     }
     _historyTotalMacros[currentDate.day + "/" + currentDate.month + "/" + currentDate.year] = _totalMacros;
@@ -540,6 +541,7 @@ function checkHistoryServings(weekDay, day, month, year) {
     $("#dayEntriesShownFor").html(displayDate).attr("day", day).attr("month", month).attr("year", year);
     if (!doesNotExist(localStorage.getItem("historyTotalMacros"))) {
         _historyTotalMacros = JSON.parse(localStorage.getItem("historyTotalMacros"));
+        console.log(_historyTotalMacros);
     }
 }
 
@@ -598,7 +600,7 @@ function updateOldBarWidths(date) {
         oldServings.calculateCalories = window.calculateCalories;
         Object.setPrototypeOf(totalOldMacros, calculateCalories);
         totalOldMacros.calculateCalories = window.calculateCalories;
-    
+        
         $("#currentFatsHistory").html(round(oldServings.fats));
         $("#currentCarbsHistory").html(round(oldServings.carbs));
         $("#currentProteinsHistory").html(round(oldServings.proteins));
@@ -736,18 +738,101 @@ $(document).on("click", "#removeEntryFromServings", function () {
     var carbs = round(parseFloat(item.carbs) * parseFloat(item.servingQuantity));
     var fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
     var proteins = round(parseFloat(item.proteins) * parseFloat(item.servingQuantity));
+    console.log(_currentMacros);
     _currentMacros.proteins -= proteins;
     _currentMacros.carbs -= carbs;
     _currentMacros.fats -= fats;
     _singleDayServing.proteins -= proteins;
     _singleDayServing.carbs -= carbs;
     _singleDayServing.fats -= fats;
-    _singleDayServing.servings.splice(indexToRemove, 1);
+    var tempSingleDayServing = JSON.parse(JSON.stringify(_singleDayServing));
+    tempSingleDayServing.servings.splice(indexToRemove, 1);
+    _historyServings[_singleDayServing.day + "/" + _singleDayServing.month + "/" + _singleDayServing.year].servings.splice(indexToRemove, 1);
     localStorage.setItem("currentMacros", JSON.stringify(_currentMacros));
-    localStorage.setItem("singleDayServing", JSON.stringify(_singleDayServing));
+    localStorage.setItem("singleDayServing", JSON.stringify(tempSingleDayServing));
+    localStorage.setItem("historyServings", JSON.stringify(_historyServings));
+    _singleDayServing = tempSingleDayServing;
     updateBarWidths();
     closeAlert();
 });
+
+function loadWeeklyStatsGraph() {
+    var past7Days = [];
+    var highestCalorieCountOfLast7Days = getHighestTotalMacrosFromLast7Days();
+    var singleIncrementUnit = Math.round(highestCalorieCountOfLast7Days) / 4;
+    highestCalorieCountOfLast7Days += singleIncrementUnit;
+    var graphMaxHeight = $("#statsBox").height() - 30;//30 is to offset to height of last index eg 3500
+    for (let j = 1; j < 8; j++) {
+        let pastDate = returnPastDate(j);
+        let singleDayServingId = pastDate.getDate() + "/" + (pastDate.getMonth() + 1) + "/" + pastDate.getFullYear();
+       
+        $("#xAxisDays p:nth-of-type(" + (8 - j) + ")").html(dayNames[pastDate.getDay()] + "<br/>" + pastDate.getDate());
+
+        console.log(singleDayServingId);
+        if (_historyServings.hasOwnProperty(singleDayServingId)) {
+            let calsFats = round(_historyServings[singleDayServingId].fats * 9);
+            let calsCarbs = round(_historyServings[singleDayServingId].carbs * 4);
+            let calsProteins = round(_historyServings[singleDayServingId].proteins * 4);
+            let fats = getHeightForGraph(calsFats, highestCalorieCountOfLast7Days, graphMaxHeight);
+            let carbs = getHeightForGraph(calsCarbs, highestCalorieCountOfLast7Days, graphMaxHeight);
+            let proteins = getHeightForGraph(calsProteins, highestCalorieCountOfLast7Days, graphMaxHeight);
+            setGraphDivValues((8 - j), fats, carbs, proteins, graphMaxHeight, calsFats, calsCarbs, calsProteins);
+        } else {
+            setGraphDivValues((8 - j), 0, 0, 0);
+        }
+    }
+
+    
+    $("#calorieIndex p").each(function () {
+        $(this).html(highestCalorieCountOfLast7Days);
+        highestCalorieCountOfLast7Days -= singleIncrementUnit;
+    });
+          
+}
+
+function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMaxHeight, calsFats, calsCarbs, calsProteins) {//sets graph heights
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable").css("height", valueFats + "px");
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable").css("height", valueCarbs + "px");
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable").css("height", valueProteins + "px");
+
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsFats));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsCarbs));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsProteins));
+
+
+}
+
+function getPercentageFromPixelValues(maxPx, givenPx) {
+    return (givenPx * 100 / maxPx);
+}
+
+function getHeightForGraph(macroCalories, maxGraphCalories, graphHeightAtMaxGraphCalories) {
+    //passing:
+    //macroCalories, which is fats, proteins of carbs in calories
+    //maxGraphCalories, which is x (3500 on default)
+    //graphHeightAtMaxGraphCalories, which is 200px for 3500 on default
+    return (macroCalories * 100 / maxGraphCalories) / 100 * graphHeightAtMaxGraphCalories;
+}
+
+function getHighestTotalMacrosFromLast7Days() {
+    var totalMacroIdsToCheck = [];
+    for (let j = 1; j < 8; j++) {
+        let pastDate = returnPastDate(j);
+        let singleDayServingId = pastDate.getDate() + "/" + (pastDate.getMonth() + 1) + "/" + pastDate.getFullYear();
+
+        if (_historyServings.hasOwnProperty(singleDayServingId)) {
+            totalMacroIdsToCheck.push(_historyServings[singleDayServingId].totalMacrosId);
+        }
+    }
+    var maxTotalMacros = 0;
+    for (let j = 0; j < totalMacroIdsToCheck.length; j++) {
+        if (_historyTotalMacros.hasOwnProperty(totalMacroIdsToCheck[j]) && maxTotalMacros < _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories())
+            maxTotalMacros = _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories();
+
+    }
+
+    return Math.round(maxTotalMacros);
+}
 
 function doesNotExist(item) {
     return (item === null || item == "undefined" || item.length <= 2);
