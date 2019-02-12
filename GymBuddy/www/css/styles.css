@@ -170,6 +170,10 @@ body *:not(.glyphicon) {
     margin-top: -61px;
 }
 
+.glyphicon-warning-sign {
+    color: #f70000;
+    font-size: 18px;
+}
 
 /* Button Group Macro - Workout */
 .parallelogram {
@@ -943,4 +947,26 @@ body *:not(.glyphicon) {
     text-align: center;
     font-size: 11px;
     padding: 5px 0px;
+}
+
+
+/*WORKOUTS*/
+#pushContent.workout > div:not(.hidden):first-of-type{
+    margin-top: 70px;
+}
+
+#addWorkoutBtn {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+#noWorkoutsToday #addWorkoutBtn span {
+    font-size: 30px;
+    transition: all 400ms;
+}
+#noWorkoutsToday #addWorkoutBtn p {
+    font-size: 25px;
+}
+
+#noWorkoutsToday #addWorkoutBtn:hover span{
 }

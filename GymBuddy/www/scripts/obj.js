@@ -3,6 +3,9 @@ var _originalBodyContent = "";
 var _totalMacros, _currentMacros, _historyServings, _singleDayServing, _historyTotalMacros, _favoriteItems;
 var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 var dayNames = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
+var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize"];
+var _msgBox = {};
+
 //Macros Object
 function totalMacros(totalFats, totalCarbs, totalProteins, month, day, year) {
     this.fats = totalFats;
@@ -74,3 +77,6 @@ function favoriteItem(title, grams, proteins, fats, carbs) {
 _favoriteItems = [];
 _historyServings = {};
 _historyTotalMacros = {};
+
+
+//workouts

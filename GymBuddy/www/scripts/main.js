@@ -33,7 +33,18 @@ $(document).ready(function () {
                 $("#btnWorkouts").trigger("click");
         }, 500)
     }
+    preloadAlerts();
 });
+
+
+function preloadAlerts() { //pre loads all possible message boxes, so that in real time there is no delay when reading from disk
+    for (let j = 0; j < _alerts.length; j++) {
+        $.get("alerts/" + _alerts[j] + ".html", function (data) {
+            _msgBox[_alerts[j]] = data;
+        });
+    }
+}
+
 
 function newSingleDayServing(time) {    
     window._singleDayServing = new window.singleDayServing(time.day, time.month, time.year);
@@ -209,6 +220,21 @@ function updateBarWidths() {
     $("#barFats").width(calculatePercentage(_currentMacros.fats, _totalMacros.fats) + "%");
     $("#barCarbs").width(calculatePercentage(_currentMacros.carbs, _totalMacros.carbs) + "%");
     $("#barProteins").width(calculatePercentage(_currentMacros.proteins, _totalMacros.proteins) + "%");
+    if (round(_totalMacros.fats) < round(_currentMacros.fats)) {
+        $("#warningFats").removeClass("hidden");
+    } else {
+        $("#warningFats").addClass("hidden");
+    }
+    if (round(_totalMacros.carbs) < round(_currentMacros.carbs)) {
+        $("#warningCarbs").removeClass("hidden");
+    } else {
+        $("#warningCarbs").addClass("hidden");
+    }
+    if (round(_totalMacros.proteins) < round(_currentMacros.proteins)) {
+        $("#warningProteins").removeClass("hidden");
+    } else {
+        $("#warningProteins").addClass("hidden");
+    }
     loadDailyServings();
 }
 
@@ -337,38 +363,34 @@ function alertMsgToAppend(fileToAppend, smoothSwitch = true, replaceWhat = [], r
 
     if ($("#alertBg").length == 0) //show both normally
         smoothSwitch = false;
+        
+    var content = "<div id='displayMessage' class='silver-bg jet-fg coolBorder'>CONTENTHERE</div>".replace("CONTENTHERE", _msgBox[fileToAppend]);
 
+    if (replaceWhat.length > 0 && replaceWith.length > 0 && replaceWhat.length == replaceWith.length)
+        for (let i = 0; i < replaceWhat.length; i++)
+            content = content.replace(replaceWhat[i], replaceWith[i]);
 
-    $.get("alerts/" + fileToAppend + ".html", function (data) {
-        var content = "<div id='displayMessage' class='silver-bg jet-fg coolBorder'>CONTENTHERE</div>".replace("CONTENTHERE", data);
+    if (!smoothSwitch) {
+        $("body").prepend("<div id='alertBg' class='transition-all-0-5 both-full noselect'><div class='parent both-full'><div class='child width-full'>" + content + "</div></div></div>");
+        $("#alertBg").animate({
+            "opacity": "1"
+        }, 100);
+    } else {
+        $("#displayMessage").animate({
+            "opacity": "0"
+        }, 100, function () {
+            $("#displayMessage").remove();
 
-        if (replaceWhat.length > 0 && replaceWith.length > 0 && replaceWhat.length == replaceWith.length)
-            for (let i = 0; i < replaceWhat.length; i++)
-                content = content.replace(replaceWhat[i], replaceWith[i]);
-
-
-        if (!smoothSwitch) {
-            $("body").prepend("<div id='alertBg' class='transition-all-0-5 both-full noselect'><div class='parent both-full'><div class='child width-full'>" + content + "</div></div></div>");
-            $("#alertBg").animate({
+            $("#alertBg > div > div").prepend(content.replace("class", "style='opacity:0;' class"));
+            $("#displayMessage").animate({
                 "opacity": "1"
             }, 100);
-        } else {
-            $("#displayMessage").animate({
-                "opacity": "0"
-            }, 100, function () {
-                $("#displayMessage").remove();
-
-                $("#alertBg > div > div").prepend(content.replace("class", "style='opacity:0;' class"));
-                $("#displayMessage").animate({
-                    "opacity": "1"
-                }, 100);
-            });
-        }
-        attributes.forEach(function (item, i) {
-            $("#alertBg").attr(item["attrName"], item["attrValue"]);
         });
-
+    }
+    attributes.forEach(function (item, i) {
+        $("#alertBg").attr(item["attrName"], item["attrValue"]);
     });
+
    
 }
 
@@ -782,12 +804,12 @@ function loadWeeklyStatsGraph() {
         }
     }
 
-    
-    $("#calorieIndex p").each(function () {
-        $(this).html(highestCalorieCountOfLast7Days);
-        highestCalorieCountOfLast7Days -= singleIncrementUnit;
-    });
-          
+    if (highestCalorieCountOfLast7Days > 0) {
+        $("#calorieIndex p").each(function () {
+            $(this).html(highestCalorieCountOfLast7Days);
+            highestCalorieCountOfLast7Days -= singleIncrementUnit;
+        });
+    }
 }
 
 function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMaxHeight, calsFats, calsCarbs, calsProteins) {//sets graph heights
@@ -795,15 +817,11 @@ function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMax
     $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable").css("height", valueCarbs + "px");
     $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable").css("height", valueProteins + "px");
 
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsFats));
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsCarbs));
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html(getPercentageFromPixelValues(graphMaxHeight, calsProteins));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html(calsFats);
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html(calsCarbs);
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html(calsProteins);
 
 
-}
-
-function getPercentageFromPixelValues(maxPx, givenPx) {
-    return (givenPx * 100 / maxPx);
 }
 
 function getHeightForGraph(macroCalories, maxGraphCalories, graphHeightAtMaxGraphCalories) {
@@ -825,9 +843,18 @@ function getHighestTotalMacrosFromLast7Days() {
         }
     }
     var maxTotalMacros = 0;
+
     for (let j = 0; j < totalMacroIdsToCheck.length; j++) {
-        if (_historyTotalMacros.hasOwnProperty(totalMacroIdsToCheck[j]) && maxTotalMacros < _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories())
-            maxTotalMacros = _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories();
+        if (_historyTotalMacros.hasOwnProperty(totalMacroIdsToCheck[j])) {
+            if (!_historyTotalMacros[totalMacroIdsToCheck[j]].hasOwnProperty(calculateCalories)){
+                //object does not have reference to calculateClaories
+                _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories = calculateCalories;
+            }
+
+            if (maxTotalMacros < _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories()) {
+                maxTotalMacros = _historyTotalMacros[totalMacroIdsToCheck[j]].calculateCalories();
+            }
+        }
 
     }
 
@@ -835,7 +862,7 @@ function getHighestTotalMacrosFromLast7Days() {
 }
 
 function doesNotExist(item) {
-    return (item === null || item == "undefined" || item.length <= 2);
+    return (item === null || typeof item == "undefined" || item.length <= 2);//null is primitive type but typeof returns Object (a JS unsolvable bug)
 }
 //remove after publish
 function countObjectItems(obj) {
@@ -850,3 +877,7 @@ function countObjectItems(obj) {
 $(document).on("click", "#header > h1", function () {
     localStorage.clear();
 });
+
+
+//WORKOUT SECTION
+
