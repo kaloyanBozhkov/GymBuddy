@@ -80,3 +80,38 @@ _historyTotalMacros = {};
 
 
 //workouts
+
+//workouts 
+/*
+var _historyWorkouts = {};
+var _exercises = {};//key is id, value is exercise obj
+
+function exercise(ID, name, description, day, month, year) { //many per day
+    this.day = day; //dates of creation
+    this.month = month;
+    this.year = year;
+    this.name = name;
+    this.exerciseID = ID;
+    this.comment = description;
+}
+
+function set(weight, reps) { //many for each exercise
+    this.weight = weight;
+    this.reps = reps;
+}
+
+function addSet(weight, reps) { //use with call on exercise
+    this.sets.push(new set(weight, reps));
+}
+
+var todayDate = new Date();
+
+function returnKeyFromDate(date) {
+    return date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear();
+}
+
+
+_historyWorkouts[returnKeyFromDate(new Date())] = {
+    
+}
+*/

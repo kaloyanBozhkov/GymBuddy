@@ -455,15 +455,15 @@ body *:not(.glyphicon) {
     font-size: 16px;
 }
 
-#singleFoodFats input {
+#singleFoodFats input, .fatsRed {
     color: #E96C66;
 }
 
-#singleFoodProteins input {
+#singleFoodProteins input, .proteinsGreen {
     color: #9cc14d;
 }
 
-#singleFoodCarbs input {
+#singleFoodCarbs input, .carbsOrange {
     color: #e5a877;
 }
 
@@ -886,6 +886,10 @@ body *:not(.glyphicon) {
     border-left: 1px solid #b5b0b2;
 }
 
+#myDopeTable > div[data-selected="open"] {
+    border: 1px dashed gray;
+}
+
 #myDopeTable > div {
     width: 14.28%;
     display: inline-block;
@@ -949,9 +953,25 @@ body *:not(.glyphicon) {
     padding: 5px 0px;
 }
 
+#graphOldValuesDisplayer {
+    height: 70px;
+    font-size: 16px;
+}
 
+#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p, #graphOldValuesDisplayer > div > p {
+    font-size: 20px;
+}
+
+#graphOldValuesDisplayer > div > p {
+    margin: 0;
+    line-height: 70px;
+}
+
+#graphOldValuesDisplayer > div > div.row {
+    display: none;
+}
 /*WORKOUTS*/
-#pushContent.workout > div:not(.hidden):first-of-type{
+#pushContent.workout > div:not(.hidden):first-of-type {
     margin-top: 70px;
 }
 
@@ -969,4 +989,5 @@ body *:not(.glyphicon) {
 }
 
 #noWorkoutsToday #addWorkoutBtn:hover span{
+
 }

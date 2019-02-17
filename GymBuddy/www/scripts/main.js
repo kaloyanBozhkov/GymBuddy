@@ -779,7 +779,6 @@ $(document).on("click", "#removeEntryFromServings", function () {
 });
 
 function loadWeeklyStatsGraph() {
-    var past7Days = [];
     var highestCalorieCountOfLast7Days = getHighestTotalMacrosFromLast7Days();
     var singleIncrementUnit = Math.round(highestCalorieCountOfLast7Days) / 4;
     highestCalorieCountOfLast7Days += singleIncrementUnit;
@@ -790,7 +789,6 @@ function loadWeeklyStatsGraph() {
        
         $("#xAxisDays p:nth-of-type(" + (8 - j) + ")").html(dayNames[pastDate.getDay()] + "<br/>" + pastDate.getDate());
 
-        console.log(singleDayServingId);
         if (_historyServings.hasOwnProperty(singleDayServingId)) {
             let calsFats = round(_historyServings[singleDayServingId].fats * 9);
             let calsCarbs = round(_historyServings[singleDayServingId].carbs * 4);
@@ -809,17 +807,30 @@ function loadWeeklyStatsGraph() {
             $(this).html(highestCalorieCountOfLast7Days);
             highestCalorieCountOfLast7Days -= singleIncrementUnit;
         });
+    } else {
+        $("#graphOldValuesDisplayer > div > p").html("No entries within last 7 days.");
     }
 }
 
-function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMaxHeight, calsFats, calsCarbs, calsProteins) {//sets graph heights
+function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMaxHeight, calsFats, calsCarbs, calsProteins) {
+    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-fats", calsFats);
+    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-carbs", calsCarbs);
+    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-proteins", calsProteins);
+
+    //sets graph heights
     $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable").css("height", valueFats + "px");
     $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable").css("height", valueCarbs + "px");
     $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable").css("height", valueProteins + "px");
 
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html(calsFats);
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html(calsCarbs);
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html(calsProteins);
+    
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html((valueFats > 8 ? calsFats : "")); //min height of 8px for each block for calories text to fit in, otherwise hide
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html((valueCarbs > 8 ? calsCarbs : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html((valueProteins > 8 ? calsProteins : ""));
+
+
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:last-of-type").html((valueFats > 23 ? (calsFats / 9) + "g" : ""));//if height greater than 23px then can fit grams under calories
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:last-of-type").html((valueCarbs > 23 ? (calsCarbs / 4) + "g" : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:last-of-type").html((valueProteins > 23 ? (calsProteins / 4) + "g" : ""));
 
 
 }
@@ -860,6 +871,41 @@ function getHighestTotalMacrosFromLast7Days() {
 
     return Math.round(maxTotalMacros);
 }
+
+$(document).on("click", "#myDopeTable > div", function () {
+    if ($(this).attr("data-selected") == "open"){
+        $(this).removeAttr("data-selected");
+
+        $("#graphOldValuesDisplayer > div").slideUp(250, function () {
+            $("#graphOldValuesDisplayer > div > p").show();
+            $("#graphOldValuesDisplayer > div > div.row").hide();
+            $("#graphOldValuesDisplayer > div").slideDown(250);
+        });
+    } else {
+        $("#myDopeTable > div[data-selected='open']").removeAttr("data-selected");
+        $(this).attr("data-selected", "open");
+        let calories = {
+            carbs: parseFloat($(this).attr("data-carbs")) / 4,
+            proteins: parseFloat($(this).attr("data-proteins")) / 4,
+            fats: parseFloat($(this).attr("data-fats")) / 9,
+            calories: calculateCalories
+        };
+        console.log(calories);
+        $("#graphOldValuesDisplayer > div").slideUp(250, function () {
+            $("#graphOldValuesDisplayer > div > p").hide();
+
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p > span").html(calories.calories());
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(2) > p:last-of-type").html(calories.fats + "g");
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(3) > p:last-of-type").html(calories.carbs + "g");
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(4) > p:last-of-type").html(calories.proteins + "g");
+
+            $("#graphOldValuesDisplayer > div > div.row").show();
+            $("#graphOldValuesDisplayer > div").slideDown(250);
+        });
+    }
+    
+});
+
 
 function doesNotExist(item) {
     return (item === null || typeof item == "undefined" || item.length <= 2);//null is primitive type but typeof returns Object (a JS unsolvable bug)
