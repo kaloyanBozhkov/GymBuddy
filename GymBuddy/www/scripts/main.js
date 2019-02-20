@@ -636,7 +636,7 @@ function updateOldBarWidths(date) {
         $("#totalCaloriesHistory").html(Math.round(totalOldMacros.calculateCalories()));
 
         oldServings = JSON.parse(JSON.stringify(oldServings)); //copy function object to object
-        loadDailyServings("#pastEntriesContainer", oldServings, "No servings added for " + totalMacrosId + ".");
+        loadDailyServings("#pastEntriesContainer", oldServings, "No servings added for " + totalMacrosId);
     } else {
 
         $("#currentFatsHistory").html(0);
@@ -652,7 +652,7 @@ function updateOldBarWidths(date) {
 
         //make total calories equal to last loaded calories
         $("#totalCaloriesHistory").html(0);
-        loadDailyServings("#pastEntriesContainer", "", "No servings added for " + totalMacrosId + ".");
+        loadDailyServings("#pastEntriesContainer", "", "No servings added for " + totalMacrosId);
     }
 }
 
@@ -828,9 +828,9 @@ function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMax
     $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html((valueProteins > 8 ? calsProteins : ""));
 
 
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:last-of-type").html((valueFats > 23 ? (calsFats / 9) + "g" : ""));//if height greater than 23px then can fit grams under calories
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:last-of-type").html((valueCarbs > 23 ? (calsCarbs / 4) + "g" : ""));
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:last-of-type").html((valueProteins > 23 ? (calsProteins / 4) + "g" : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:last-of-type").html((valueFats > 23 ? parseFloat((calsFats / 9).toFixed(2)) + "g" : ""));//if height greater than 23px then can fit grams under calories
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:last-of-type").html((valueCarbs > 23 ? parseFloat((calsCarbs / 4).toFixed(2)) + "g" : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:last-of-type").html((valueProteins > 23 ? parseFloat((calsProteins / 4).toFixed(2)) + "g" : ""));
 
 
 }
@@ -885,16 +885,16 @@ $(document).on("click", "#myDopeTable > div", function () {
         $("#myDopeTable > div[data-selected='open']").removeAttr("data-selected");
         $(this).attr("data-selected", "open");
         let calories = {
-            carbs: parseFloat($(this).attr("data-carbs")) / 4,
-            proteins: parseFloat($(this).attr("data-proteins")) / 4,
-            fats: parseFloat($(this).attr("data-fats")) / 9,
+            carbs: parseFloat((parseFloat($(this).attr("data-carbs")) / 4).toFixed(2)),
+            proteins: parseFloat((parseFloat($(this).attr("data-proteins")) / 4).toFixed(2)),
+            fats: parseFloat((parseFloat($(this).attr("data-fats")) / 9).toFixed(2)),
             calories: calculateCalories
         };
         console.log(calories);
         $("#graphOldValuesDisplayer > div").slideUp(250, function () {
             $("#graphOldValuesDisplayer > div > p").hide();
 
-            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p > span").html(calories.calories());
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p > span").html(round(calories.calories()));
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(2) > p:last-of-type").html(calories.fats + "g");
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(3) > p:last-of-type").html(calories.carbs + "g");
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(4) > p:last-of-type").html(calories.proteins + "g");
