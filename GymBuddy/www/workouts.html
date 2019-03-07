@@ -1,9 +1,47 @@
 <div id="pushContent" class="workout position-absolute both-full">
-  <div id="noWorkoutsToday" class="w-100">
-      <h3 class="text-center">No workouts for today.</h3>
-      <div id="addWorkoutBtn" class="text-center">
-          <span class="glyphicon glyphicon-plus"></span>
-          <p class="margin-0">Add Workout</p>
-      </div>
-  </div>
+
+    <div id="addWorkoutBtn" class="text-center">
+        <span class="glyphicon glyphicon-plus-sign"></span>
+        <p class="margin-0">Add Workout</p>
+    </div>
+    <div id="workoutsToday" class="box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10">
+        <!-- <h3 class="text-center">No workouts for today.</h3> -->
+        <div class="individualExercise">
+            <div class="workoutHeader">
+                <h3 class="margin-0">Flat Barbell Bench Press</h3>
+            </div>
+            <div class="workoutContent">
+                <div class="set">
+                    <div class="commentSection">
+                        <span class="glyphicon glyphicon-flag"></span>
+                    </div><div class="measurementSection" data-note="true">
+                        <p><span>102.5&nbsp;</span><span>&nbsp;&nbsp;&nbsp;8&nbsp;</span></p>
+                    </div>
+                </div>
+                <!-- last div of type set have border bottom and data-attribute for total weight -->
+                <div class="addSet">
+                    <div class="separator inline-block"></div>
+                    <div class="totalVolume">
+                        <p><span>1250</span>kg</p>
+                    </div>
+                    <p class="buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="separator"></div>
+    <div class="box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-10">
+        <!-- Start old workout section -->
+        <div id="menuHistoryWorkouts" class="position-relative w-100 text-center">
+            <p class="inline-block margin-0 font-size-22 nowrap"><span id="dayWorkoutsShownFor"></span></p>
+            <div id="menu-left" class="position-absolute">
+                <span class="glyphicon glyphicon glyphicon-menu-left"></span>
+            </div>
+            <div id="menu-right" class="position-absolute hidden">
+                <span class="glyphicon glyphicon glyphicon-menu-right"></span>
+            </div>
+        </div>
+        <p id="noWorkoutsForDate" class="margin-0 text-center">No workouts on this date.</p>
+    </div>
 </div>

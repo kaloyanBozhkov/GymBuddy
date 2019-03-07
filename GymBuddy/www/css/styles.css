@@ -728,34 +728,34 @@ body *:not(.glyphicon) {
     font-size: 22px;
 }
 
-#menuHistoryServings #menu-right, #menuHistoryServings #menu-left {
+#menuHistoryServings #menu-right, #menuHistoryServings #menu-left, #menuHistoryWorkouts #menu-right, #menuHistoryWorkouts #menu-left {
     top: 0;
     transform-origin: center;
     transition: all 50ms;
 }
 
-#menuHistoryServings #menu-right.btnHover, #menuHistoryServings #menu-left.btnHover {
+#menuHistoryServings #menu-right.btnHover, #menuHistoryServings #menu-left.btnHover, #menuHistoryWorkouts #menu-right.btnHover, #menuHistoryWorkouts #menu-left.btnHover {
     transform: scale(0.9);
     opacity: 0.6;
 }
 
-#menuHistoryServings #menu-right {
+#menuHistoryServings #menu-right, #menuHistoryWorkouts #menu-right {
     right: 0;
 }
 
-#menuHistoryServings #menu-left {
+#menuHistoryServings #menu-left, #menuHistoryWorkouts #menu-left, {
     left: 0;
 }
 
 
-#menuHistoryServings.position-relative.w-100 p {
+#menuHistoryServings.position-relative.w-100 p, #menuHistoryWorkouts.position-relative.w-100 p {
     line-height: 30px;
     margin-top: 5px;
     margin-bottom: 5px;
     border-bottom: 1px solid #a59fa1;
 }
 
-#menuHistoryServings #menu-right span, #menuHistoryServings #menu-left span {
+#menuHistoryServings #menu-right span, #menuHistoryServings #menu-left span, #menuHistoryWorkouts #menu-right span, #menuHistoryWorkouts #menu-left span {
     line-height: 40px;
     width: 40px;
 }
@@ -980,14 +980,143 @@ body *:not(.glyphicon) {
     margin: 0 auto;
 }
 
-#noWorkoutsToday #addWorkoutBtn span {
+#workoutsToday > h3{
+    margin: 20px;
+}
+
+#addWorkoutBtn span {
     font-size: 30px;
     transition: all 400ms;
 }
-#noWorkoutsToday #addWorkoutBtn p {
+#addWorkoutBtn p {
     font-size: 25px;
 }
+#addWorkoutBtn:hover span{
 
-#noWorkoutsToday #addWorkoutBtn:hover span{
+}
 
+#separator {
+    height: 1px;
+    border-top: 1px dashed #343132;
+    margin: 30px 5%;
+    width: 90%;
+}
+
+#noWorkoutsForDate {
+    font-size: 20px;
+    padding: 20px;
+}
+
+.individualExercise{
+    padding: 10px;
+}
+
+
+.individualExercise .workoutHeader h3 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #a59fa1;
+}
+
+.individualExercise .set {
+    font-size: 22px;
+    margin-top: 15px;
+    padding: 5px;
+    transition: all 500ms;
+}
+
+.individualExercise .set:hover, .individualExercise .set:active {
+    background-color: #e0e0e0;
+}
+
+.individualExercise .set *{
+    display:inline-block;
+    vertical-align: top;
+}
+
+.individualExercise .commentSection {
+    width: 30%;
+    text-align: left;
+}
+
+.individualExercise .measurementSection {
+    width: 70%;
+}
+
+.individualExercise .measurementSection p {
+    display: block;
+    margin: 0;
+    text-align: left;
+}
+
+
+.individualExercise .measurementSection p span:first-of-type {
+    position: relative;
+    margin-right: 25px;
+}
+
+.individualExercise .measurementSection p span:first-of-type::after {
+    content: ' kg';
+}
+
+.individualExercise .measurementSection p span:first-of-type::after, .individualExercise .measurementSection p span:last-of-type::after {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 105%;
+}
+
+.individualExercise .measurementSection p span:last-of-type {
+    position: relative;
+}
+
+.individualExercise .measurementSection p span:last-of-type::after {
+    content: ' reps';
+}
+
+.individualExercise .measurementSection[data-note="true"]{
+    position: relative;
+}
+
+.individualExercise .measurementSection[data-note="true"]::after {
+    display: block;
+    content: '\e123';
+    position: absolute;
+    left: 100%;
+    font-size: 16px;
+    font-family: 'Glyphicons Halflings';
+    transform: translateX(-100%) translateY(-50%);
+    top: 50%;
+}
+
+.individualExercise .addSet {
+    width: 70%;
+    margin-top:10px;
+    margin: 0;
+    margin-left: 30%;
+    text-align: center;
+}
+
+.individualExercise .addSet p {
+    font-size: 20px;
+    margin: 0;
+}
+
+.individualExercise .addSet .separator, .individualExercise .addSet .totalVolume p {
+    margin: 0;
+    width:100%;
+}
+
+.individualExercise .addSet .totalVolume p{
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.individualExercise .addSet .totalVolume p::after {
+    content: '(total volume)';
+    display: block;
+    font-weight: 100;
+    margin: 0;
+    line-height: 10px;
+    margin-bottom: 15px;
+    font-size: 15px;
 }
