@@ -977,7 +977,67 @@ function updateOldWorkoutSection(date) {
 }
 
 function loadWorkoutsForToday() {
-    if (_historyWorkouts.length > 0 && _historyWorkouts[window.returnKeyFromDate(new Date())]) {//check if for TODAY there is any workouts saved already, if soooo load them!
-        
+    let todayDate = window.returnKeyFromDate(new Date());
+    if (_historyWorkouts.hasOwnProperty(todayDate)) {
+        //check if for TODAY there is any workouts saved already, if soooo load them!
+        var div = "";
+        for (var singleExercise of _historyWorkouts[todayDate]) {//assume array of singleExercises
+            let maxForExercise = window.getMax(singleExercise.exerciseID);
+            let setsDiv = "";
+             div += `<div class="individualExercise box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10">
+                <div class="workoutHeader">
+                    <h3 class="margin-0">`+ _exercises[singleExercise.exerciseID].name +`</h3>
+                </div>
+                <div class="workoutContent" data-empty="`+ (singleExercise.set.length == 0 ? "true" : "false") +`">
+                    <!-- start sets -->
+                    ` + (singleExercise.set.length == 0 ? "<p class='noSets'>No sets added yet</p>" : "SETS") + `
+                    <!-- last div of type set have border bottom and data-attribute for total weight -->
+                    <div class="addSet">
+                        <div class="separator inline-block"></div>
+                        <div class="totalVolume">
+                            <p><span>TOTALVOLUME</span>kg</p>
+                        </div>
+                        <p class="buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
+                    </div>
+                </div>
+            </div>`;
+           
+             for (var set of singleExercise.set) {//array of sets
+                 setsDiv += `<div class="set" data-record="`+(set.weight > maxForExercise.maxWeight ? "visible" : "invisible")+`">
+                    <div class="recordSection">
+                        <span class="glyphicon glyphicon-flag"></span>
+                    </div><div class="measurementSection" data-note="`+ (set.note.length > 0 ? "true" : "false") + `">
+                              <p>
+                                  <span>`+ set.weight +`</span><span>kg</span>
+                                  <span>`+ set.reps +`</span><span>reps</span>
+                              </p>
+                    </div>
+                </div>`;
+             }
+            
+             div.replace("SETS", setsDiv);
+        }
+        $("#workoutsToday").empty().append(div);
+        $("#exercisesMsg").addClass("hidden");
+    } else {
+        //no workouts for today
+        $("#exercisesMsg").removeClass("hidden");
     }
 }
+
+$(document).on("click", "#addWorkoutBtn", function () {
+    //show msgbox for new workout
+
+    //add new one
+    let exercise = new singleExercise(1);
+
+    let todayDate = window.returnKeyFromDate(new Date());
+    if (_historyWorkouts.hasOwnProperty(todayDate)) {
+        _historyWorkouts[todayDate].push(exercise);
+    } else {
+        _historyWorkouts[todayDate] = [exercise];
+    }
+
+    console.log("_historyWorkouts", _historyWorkouts);
+    loadWorkoutsForToday();
+});

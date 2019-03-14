@@ -1,34 +1,11 @@
 <div id="pushContent" class="workout position-absolute both-full">
 
-    <div id="addWorkoutBtn" class="text-center">
-        <span class="glyphicon glyphicon-plus-sign"></span>
-        <p class="margin-0">Add Workout</p>
+    <div id="addWorkoutBtn" class="text-center position-relative">
+        <div></div>
     </div>
-    <div id="workoutsToday" class="box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10">
-        <!-- <h3 class="text-center">No workouts for today.</h3> -->
-        <div class="individualExercise">
-            <div class="workoutHeader">
-                <h3 class="margin-0">Flat Barbell Bench Press</h3>
-            </div>
-            <div class="workoutContent">
-                <div class="set">
-                    <div class="commentSection">
-                        <span class="glyphicon glyphicon-flag"></span>
-                    </div><div class="measurementSection" data-note="true">
-                        <p><span>102.5&nbsp;</span><span>&nbsp;&nbsp;&nbsp;8&nbsp;</span></p>
-                    </div>
-                </div>
-                <!-- last div of type set have border bottom and data-attribute for total weight -->
-                <div class="addSet">
-                    <div class="separator inline-block"></div>
-                    <div class="totalVolume">
-                        <p><span>1250</span>kg</p>
-                    </div>
-                    <p class="buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
-                </div>
-            </div>
-        </div>
-
+    <p id="exercisesMsg" class="w-100 text-center hidden">No exercises for today yet <br/>Add some!</p>
+    <div id="workoutsToday">
+       <!-- Workouts for the day -->
     </div>
     <div id="separator"></div>
     <div class="box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-10">

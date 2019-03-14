@@ -83,11 +83,12 @@ _historyTotalMacros = {};
 //workouts
 var _historyWorkouts = {};
 var _exercises = {
+    1: new exercise(1, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
 
 };//key is id, value is exercise obj. These are the saved exercise names and records
 var _dailyExercises = {}; //these are the exercises for each day
 
-function exercise(ID, name, description, maxWeight = 0, maxReps = 0, bestTime = 0) { //saved exercise
+function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 0, bestTime = 0) { //saved exercise
     this.name = name;
     this.exerciseID = ID;
     this.comment = description; 
@@ -97,12 +98,28 @@ function exercise(ID, name, description, maxWeight = 0, maxReps = 0, bestTime = 
 }
 
 function singleExercise(exerciseID) {
+    this.exerciseID = exerciseID;
     this.set = [];
-    this.addSet = set(weight, reps, time);
+    this.addSet = set;
 }
 
-function set(weight, reps, time) { //many for each exercise
+function getMax(exerciseID) {
+    if (_exercises.hasOwnProperty(exerciseID))
+        return {
+            maxWeight: _exercises[exerciseID].maxWeight,
+            maxReps: _exercises[exerciseID].maxReps,
+            bestTime: _exercises[exerciseID].bestTime
+        }
+}
+
+function getExerciseDetails(exerciseID, propertyName) {
+    if (_exercises.hasOwnProperty(exerciseID) && _exercises[exerciseID].hasOwnProperty(propertyName))
+        return _exercises[exerciseID][propertyName];
+}
+
+function set(weight, reps, time, note = "") { //many for each exercise
     this.set.push({
+        note: note,
         weight: weight,
         reps: reps,
         rest: rest
