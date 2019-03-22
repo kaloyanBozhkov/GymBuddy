@@ -332,7 +332,21 @@ body *:not(.glyphicon) {
     width: 95%;
     margin: 0 auto;
     padding: 10px;
-    max-width: 500px;
+    max-width: 400px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.45);
+    animation-name: popIn;
+    animation-fill-mode:forwards;
+    animation-duration: 400ms;
+    animation-direction: normal
+}
+
+@keyframes popIn {
+    from{
+        transform: scale(0);
+    }
+    to{
+        transform: scale(1);
+    }
 }
 
 #displayMessage > h3:first-of-type:not(.break-word) {
@@ -343,34 +357,65 @@ body *:not(.glyphicon) {
     width: 100%;
 }
 
-
 #displayMessage h3:not(.textNextToRadioOnAlert) {
     margin: 0;
-} 
+}
 
 #setGoalsInputs, #setGoalsInputsTwo {
-    margin-top: 20px;
-} 
+    margin-top: 10px;
+}
 
-#setGoalsInputs h3 {
-    width: 30%;
-} 
 
-#setGoalsInputs input {
+
+#setGoalsInputs input, .alertServings #servingSize {
     margin-bottom: 10px;
-    margin-left: 10%;
     vertical-align: top;
-    width: 60%;
-} 
+    border: none;
+    outline: none;
+    max-width: 160px;
+    background-color: transparent;
+    font-size: 20px;
+    text-align: center;
+    border-bottom: 1px solid #a59fa1;
+}
+
+#setGoalsInputs table {
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+#setGoalsInputs table tr td{
+    width: 50%;
+}
+
+#setGoalsInputs table tr td:last-of-type {
+    text-align: right;
+}
+
+#setGoalsInputs table tr td input {
+    width: 100%;
+}
+
+@media (min-width: 300px){
+    #displayMessage .buttonStyled {
+        font-size: 20px;
+    }
+}
 
 #displayMessage .buttonStyled {
-    font-size: 20px;
-    margin: 0;
+    font-size: 18px;
+    margin: 0 1%;
+    width: 48%;
 } 
 
 #displayMessage .separator {
     margin-bottom: 3px;
-} 
+}
+
+#displayMessage label {
+    font-size: 22px;
+    padding-left: 10px;
+}
 
 .textNextToRadioOnAlert {
     margin-bottom: 0px;
@@ -387,19 +432,70 @@ body *:not(.glyphicon) {
     display: none;
 }
 
-#setGoalsInputsTwo #caloriesCount {
-    width: 60%;
+
+#gramsPrecentagesSwitch {
+    width: 90%;
+    border: 1px solid #a59fa1;
+    margin: 0 auto;
+    position: relative;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+#gramsPrecentagesSwitch div:first-of-type {
+    width: 1px;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0 auto;
+    background-color: #a59fa1;
+}
+#gramsPrecentagesSwitch p {
+    font-size: 22px;
+    margin: 0;
+    padding: 10px;
+    width: 50%;
+    text-align: center;
+}
+#gramsPrecentagesSwitch p.active {
+    background-color: #e8b558;
+    color: white;
+}
+
+#setGoalsInputsTwo table tr:first-of-type input{
+    margin-right:10%;
+    max-width:170px;
+}
+#setGoalsInputsTwo table tr:not(:first-of-type) input {
+    max-width: 55px;
+}
+@media (max-width: 326px){
+    #displayMessage > h3:first-of-type {
+        font-size: 22px;
+    }
+
+    #gramsPrecentagesSwitch p {
+        font-size:18px
+    }
 }
 
 #setGoalsInputsTwo input {
+    max-width:170px;
     margin-bottom: 10px;
-    margin-left: 10%;
     vertical-align: top;
-    width: 50%;
-} 
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 20px;
+    text-align: center;
+    border-bottom: 1px solid #a59fa1;
+}
 
-#setGoalsInputsTwo h3:not(.percentageSign) {
-    width: 30%;
+#setGoalsInputsTwo tr:not(:first-of-type) h3:not(.percentageSign) {
+    padding-left: 35px;
+    margin-right: -35px;
 } 
   
 .percentageSign {
@@ -414,14 +510,18 @@ body *:not(.glyphicon) {
 #foodTracker h3, #foodTracker .macroBlock p {
     margin: 0;
 }
-
+#favoriteName {
+    font-size:25px;
+}
+#foodName {
+    font-size: 24px;
+}
 #foodName, #favoriteName {
     margin: 0 auto;
     width: 80%;
     border: none;
     background-color: transparent;
     border-bottom: 1px solid #a59fa1;
-    font-size: 24px;
 }
 
 #foodName:focus, .macroBlock input:focus, #favoriteName:focus {
@@ -528,24 +628,19 @@ body *:not(.glyphicon) {
     margin-bottom: 20px;
 }
 
-.alertServings h3{
+.alertServings h3 {
     min-width: 200px;
 }
 
-.alertServings h3:not(.width-full){
-    width: 43%;
+.alertServings p:first-of-type{
+    margin-bottom: 0;
 }
 
 .alertServings #servingSize {
-    min-width: 230px;
-    width: 55%;
-}
-
-@media (max-width: 510px) {
-    .alertServings #servingSize {
-        width: 100%;
-        margin-top: 10px;
-    }
+    margin: 0 auto;
+    border: none;
+    font-size: 55px;
+    height: 45px;
 }
 
 #dailyHistory{
@@ -761,10 +856,11 @@ body *:not(.glyphicon) {
 }
 
 #favoriteName {
-    font-size: 18px;
     margin-top: 5px;
 }
-
+input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeholder {
+    font-size: 0;
+}
 @media (max-height: 420px) {
     #favoriteSelect {
         max-height: 150px !important;
@@ -802,9 +898,8 @@ body *:not(.glyphicon) {
 
 #favoriteSelect > div.favoriteEntry > div > p:not(.deleteFavorite) {
     font-size: 22px;
-
+    overflow-y:hidden;
     overflow-x: auto;
-    white-space: nowrap;
 }
 #favoriteSelect > div.favoriteEntry > p.deleteFavorite {
     font-size: 18px;
@@ -829,15 +924,22 @@ body *:not(.glyphicon) {
     vertical-align: middle;
     right:2px;
 }
-
+#titleForDelete span {
+    font-weight: 900;
+    opacity: 0.6;
+}
 #deleteFromFavoritesConfirm {
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
+    top: 50%;
+    left: 0;
+    right: 0;
+    bottom: 0;
     transition: all 200ms;
+    transform: translateY(-50%);
 }
 
+#deleteFromFavoritesConfirm .buttonStyled {
+    margin: 0;
+}
 #deleteFromFavoritesConfirm > div > div {
     width: 95%;
     margin: auto;
@@ -1179,4 +1281,36 @@ body *:not(.glyphicon) {
     line-height: 10px;
     margin-bottom: 15px;
     font-size: 15px;
+}
+
+#setAddSet input {
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 20px;
+    text-align: center;
+    border-bottom: 1px solid #a59fa1;
+    width: 60px;
+}
+
+#setAddSet .title {
+    text-align:center;
+}
+
+
+#setAddSet table, .max-width-t {
+    max-width: 300px;
+    margin: 10px auto;
+}
+
+#setAddSet table tr td{
+    width:50%;
+}
+
+#setAddSet table tr td:first-of-type {
+    text-align: left;
+}
+
+#setAddSet table tr td:last-of-type {
+    text-align: right;
 }

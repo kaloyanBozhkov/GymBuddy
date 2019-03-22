@@ -1,12 +1,24 @@
-<h3>Choose your macros:</h3>
+<h3 class="text-center break-word">Choose your macros:</h3>
 <div id="setGoalsInputs" class="width-full">
-    <h3 class='inline-block'>Fats: </h3><input id="fatsCount" class="inline-block" placeholder="In grams" type="number" min="0" />
-    <h3 class='inline-block'>Carbs: </h3><input id="carbsCount" class="inline-block" placeholder="In grams" type="number" min="0" />
-    <h3 class='inline-block'>Proteins: </h3><input id="proteinsCount" class="inline-block" placeholder="In grams" type="number" min="0" />
+    <table class="width-full">
+        <tbody class="width-full">
+            <tr>
+                <td><h3>Fats:</h3></td>
+                <td class="text-right"><input id="fatsCount" placeholder="In grams" type="number" min="0" /></td>
+            </tr>
+            <tr>
+                <td><h3>Carbs:</h3></td>
+                <td class="text-right"><input id="carbsCount" placeholder="In grams" type="number" min="0" /></td>
+            </tr>
+            <tr>
+                <td><h3>Proteins:</h3></td>
+                <td class="text-right"><input id="proteinsCount" placeholder="In grams" type="number" min="0" /></td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 <p class="errorMsg width-full text-center">You must fill in all the fields before continuing.</p>
 <div class="separator block separatorMarginBottom" style="margin-top: 10px;"></div>
 <div class="width-full text-center">
-    <p id="setMacrosGrams" class="inline-block buttonStyled coolBorder">Set Macros</p>
-    <p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
+    <p id="setMacrosGrams" class="inline-block buttonStyled coolBorder">Set Macros</p><p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
 </div>

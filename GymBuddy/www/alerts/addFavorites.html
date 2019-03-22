@@ -1,14 +1,52 @@
-<h3>Save to favorites:</h3>
+<h3 class="text-center">Save to favorites:</h3>
 <div id="setGoalsInputs" class="width-full">
-    <h3 class='inline-block'>Title: </h3><input id="itemName" class="inline-block" placeholder="Item Name" type="text" value="VALUETITLE" />
-    <h3 class='inline-block'>Grams: </h3><input id="gramsCount" class="inline-block" placeholder="e.g. 100" type="number" min="0" value="VALUEGRAMS" />
-    <h3 class='inline-block'>Fats: </h3><input id="fatsCount" class="inline-block" placeholder="In grams" type="number" min="0" max="500" value="VALUEFATS" />
-    <h3 class='inline-block'>Carbs: </h3><input id="carbsCount" class="inline-block" placeholder="In grams" type="number" min="0" max="500" value="VALUECARBS" />
-    <h3 class='inline-block'>Proteins: </h3><input id="proteinsCount" class="inline-block" placeholder="In grams" type="number" min="0" max="500" value="VALUEPROTEINS" />
+    <table class="width-full">
+        <tbody class="width-full">
+            <tr>
+                <td>
+                    <h3>Title:</h3>
+                </td>
+                <td>
+                    <input id="itemName" placeholder="Item Name" type="text" value="VALUETITLE" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Grams:</h3>
+                </td>
+                <td>
+                    <input id="gramsCount" placeholder="e.g. 100" type="number" min="0" value="VALUEGRAMS" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Fats:</h3>
+                </td>
+                <td>
+                    <input id="fatsCount" placeholder="In grams" type="number" min="0" max="500" value="VALUEFATS" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Carbs:</h3>
+                </td>
+                <td>
+                    <input id="carbsCount" placeholder="In grams" type="number" min="0" max="500" value="VALUECARBS" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Proteins:</h3>
+                </td>
+                <td>
+                    <input id="proteinsCount" placeholder="In grams" type="number" min="0" max="500" value="VALUEPROTEINS" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
 <p class="errorMsg width-full text-center">You must fill in all the fields before continuing.</p>
 <div class="separator block separatorMarginBottom" style="margin-top: 10px;"></div>
 <div class="width-full text-center">
-    <p id="saveItemToFavorites" class="inline-block buttonStyled coolBorder">Save Item</p>
-    <p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
+    <p id="saveItemToFavorites" class="inline-block buttonStyled coolBorder">Save Item</p><p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
 </div>

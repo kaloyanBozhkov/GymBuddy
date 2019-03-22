@@ -1,12 +1,15 @@
 
-<div class="alertServings width-full margin-top-10">
-    <h3 class="width-full inline-block vertical-align-top font-size-22">Servings for FOODNAME:</h3>
-    <input id="servingSize" class="inline-block vertical-align-top" placeholder="How many servings of GRAMS grams" type="number" min="0" />
+<div class="alertServings width-full">
+    <h3 class="width-full block">Add servings for FOODNAME:</h3>
+    <div>
+        <p class="text-center block w-100 font-size-22 margin-top-10">Servings:</p>
+        <input id="servingSize" class="block" placeholder="0" type="number" min="0" />
+        <p class="text-center block w-100 font-size-18 margin-bottom-10">(GRAMS grams each)</p>
+    </div>
 </div>
 <div class="separator block separatorMarginBottom" style="margin-top: 10px;"></div>
-<div class="width-full text-center">
-    <p id="setServingSize" class="inline-block buttonStyled coolBorder">Add Servings</p>
-    <p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
+<div class="width-100 text-center">
+    <p id="setServingSize" class="inline-block buttonStyled coolBorder">Add Servings</p><p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
 </div>
 
 <!-- add calculation of calories upon changing serving size, real time display before adding -->

@@ -268,20 +268,14 @@ $(document).on("change", ".displayMsgRadio", function () {
     $(".displayMsgRadio:not(#" + $(this).attr("id") + ")").prop("checked", false);
 });
 
-$(document).on("click", ".textNextToRadioOnAlert", function () {
-    if ($(this).html().trim().toLowerCase() == "grams") {
-        $("#displayMessage #grams").prop("checked", true);
-        $("#displayMessage #percentages").prop("checked", false);
-    } else {
-        $("#displayMessage #percentages").prop("checked", true);
-        $("#displayMessage #grams").prop("checked", false);
-    }
+$(document).on("click", "#continueGoalSet", function () {
+    alertMsgToAppend("setGoals" + $(this).attr("data-which"));
 });
 
-
-$(document).on("click", "#continueGoalSet", function () {
-    var what = $(".displayMsgRadio:checked").val().substr(0, 1).toUpperCase() + $(".displayMsgRadio:checked").val().substr(1).toLowerCase();
-    alertMsgToAppend("setGoals" + what);
+$(document).on("click", "#gramsPrecentagesSwitch p", function () {
+    $("#continueGoalSet").attr("data-which", $(this).html());
+    $("#gramsPrecentagesSwitch p.active").removeClass("active");
+    $(this).addClass("active");
 });
 
 $(document).on("click", "#setMacrosGrams", function () {
@@ -997,7 +991,7 @@ function loadWorkoutsForToday() {
                         <div class="totalVolume">
                             <p><span>TOTALVOLUME</span>kg</p>
                         </div>
-                        <p class="buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
+                        <p data-date='`+todayDate+`' data-id='`+ singleExercise.exerciseID+`' class="addSetBtn buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
                     </div>
                 </div>
             </div>`;
@@ -1014,7 +1008,6 @@ function loadWorkoutsForToday() {
                     </div>
                 </div>`;
              }
-            
              div.replace("SETS", setsDiv);
         }
         $("#workoutsToday").empty().append(div);
@@ -1040,4 +1033,11 @@ $(document).on("click", "#addWorkoutBtn", function () {
 
     console.log("_historyWorkouts", _historyWorkouts);
     loadWorkoutsForToday();
+});
+
+
+$(document).on("click", ".addSetBtn", function () {
+    var exerciseID = $(this).attr("data-id");
+
+    alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
 });

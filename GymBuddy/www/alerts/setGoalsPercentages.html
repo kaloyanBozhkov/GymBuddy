@@ -1,13 +1,29 @@
-<h3>Set calories & percentages:</h3>
+<h3 class="text-center break-word">Set calories & percentages:</h3>
 <div id="setGoalsInputsTwo" class="width-full">
-    <h3 class='inline-block'>Calories: </h3><input id="caloriesCount" class="inline-block" placeholder="Total daily calories" type="number" min="0" />
-    <h3 class='inline-block'>Fats: </h3><input id="fatsCount" class="inline-block" placeholder="In percentages (e.g. 18%)" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3>
-    <h3 class='inline-block'>Carbs: </h3><input id="carbsCount" class="inline-block" placeholder="In percentages (e.g. 60%)" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3>
-    <h3 class='inline-block'>Proteins: </h3><input id="proteinsCount" class="inline-block" placeholder="In percentages (e.g. 22%)" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3>
+    <table class="width-full">
+        <tbody class="width-full">
+            <tr>
+                <td><h3>Calories: </h3></td>
+                <td class="text-right"><input id="caloriesCount" placeholder="Total daily calories" type="number" min="0" /></td>
+            </tr>
+            <tr>
+                <td><h3>Fats: </h3></td>
+                <td class="text-right"><input id="fatsCount" class="inline-block" placeholder="25" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3></td>
+            </tr>
+            <tr>
+                <td><h3>Carbs: </h3></td>
+                <td class="text-right"><input id="carbsCount" class="inline-block" placeholder="50" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3></td>
+            </tr>
+            <tr>
+                <td><h3>Proteins: </h3></td>
+                <td class="text-right"><input id="proteinsCount" class="inline-block" placeholder="25" type="number" min="0" /><h3 class="inline-block percentageSign text-center">%</h3></td>
+            </tr>
+        </tbody>
+    </table>
+
 </div>
 <p class="errorMsg width-full text-center">The total percentage must be equal to 100.</p>
 <div class="separator block separatorMarginBottom" style="margin-top: 10px;"></div>
 <div class="width-full text-center">
-    <p id="setMacrosPercentages" class="inline-block buttonStyled coolBorder">Set Macros</p>
-    <p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
+    <p id="setMacrosPercentages" class="inline-block buttonStyled coolBorder">Set Macros</p><p id="cancel" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p>
 </div>
