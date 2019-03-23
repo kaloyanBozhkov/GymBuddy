@@ -104,12 +104,12 @@ function loadContent(what) {//initializes one part of the app vs the other
             let d = returnPastDate(1);
             if (what == "macros") {
                 updateBarWidths();
-                checkHistoryServings(d.getDay(), d.getDate(), d.getMonth() + 1, d.getFullYear());
+                checkHistoryServings(d);
                 updateOldBarWidths(d);
                 loadWeeklyStatsGraph();
                 localStorage.setItem("lastOpened", "macros");
             } else {//workouts
-                checkHistoryWorkouts(d.getDay(), d.getDate(), d.getMonth() + 1, d.getFullYear());
+                checkHistoryWorkouts(d);
                 localStorage.setItem("lastOpened", "workouts");
                 loadWorkoutsForToday();
             }
@@ -151,11 +151,11 @@ function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServ
                         <li><p>Carbs: <span>CARBSg</span></p></li>
                         <li><p>Protein: <span>PROTEINSg</span></p></li>
 		            </ul>
-                </div><div><div class='saveEntry' title='ATTRNAME' carbs='ATTRCARBS' fats='ATTRFATS' proteins='ATTRPROTEINS' grams='ATTRGRAMS'>
+                </div><div><div class='saveEntry' data-values='DATAVALUES'>
                         <span class='glyphicon glyphicon-heart'></span>
                     </div>
                     `+ (entriesContainer == "#entriesContainer" ? `
-                    <div class='removeEntry' itemId='ATTRID'>
+                    <div class='removeEntry' data-item-id='ATTRID'>
                         <span class='glyphicon glyphicon-trash'></span>
                     </div>` : "") + `
                 </div>
@@ -169,20 +169,40 @@ function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServ
         for (let j = singleDayServing.servings.length - 1; j >= 0; j--) {
             let item = singleDayServing.servings[j];
             let hideLast = (j == 0 ? "" : "hidden");
+
             let calories = window.calculateCalories.call(item) * parseFloat(item.servingQuantity);
             let proteins = round(parseFloat(item.proteins) * parseFloat(item.servingQuantity));
             let carbs = round(parseFloat(item.carbs) * parseFloat(item.servingQuantity));
             let fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
-            if (entriesContainer == "#entriesContainer") {
-                $(entriesContainer).append(singleServingEntryDiv.replace("FOODNAME", item.itemName).replace("TIME", item.hour + ":" + item.minutes).replace("HIDELAST", hideLast).replace("FATS", fats).replace("CARBS", carbs).replace("PROTEINS", proteins).replace("CALS", calories).replace("SERV", item.servingQuantity).replace("GRMS", item.servingSize).replace("ATTRID", j).replace("ATTRNAME", item.itemName).replace("ATTRCARBS", item.carbs).replace("ATTRFATS", item.fats).replace("ATTRPROTEINS", item.proteins).replace("ATTRGRAMS", item.servingSize));
-            } else {
-                $(entriesContainer).append(singleServingEntryDiv.replace("FOODNAME", item.itemName).replace("TIME", item.hour + ":" + item.minutes).replace("HIDELAST", hideLast).replace("FATS", fats).replace("CARBS", carbs).replace("PROTEINS", proteins).replace("CALS", calories).replace("SERV", item.servingQuantity).replace("GRMS", item.servingSize).replace("ATTRNAME", item.itemName).replace("ATTRCARBS", item.carbs).replace("ATTRFATS", item.fats).replace("ATTRPROTEINS", item.proteins).replace("ATTRGRAMS", item.servingSize));
+            let tmpObj = {
+                title: item.itemName,
+                proteins: proteins,
+                fats: fats,
+                carbs: carbs,
+                grams: item.servingSize
             }
+            let valuesToReplace = ["FOODNAME", "TIME", "HIDELAST", "FATS", "CARBS", "PROTEINS", "CALS", "SERV", "GRMS", "ATTRNAME", "DATAVALUES"];
+            let valuesToReplaceWith = [item.itemName, item.hour + ":" + item.minutes, hideLast, fats, carbs, proteins, calories, item.servingQuantity, item.servingSize, item.itemName, JSON.stringify(tmpObj)];
+
+            if (entriesContainer == "#entriesContainer") {
+                valuesToReplace.push("ATTRID");
+                valuesToReplaceWith.push(j);
+            }
+
+            $(entriesContainer).append(replaceArrays(singleServingEntryDiv, valuesToReplace, valuesToReplaceWith));
+
         }
 
     } else {
         $(entriesContainer).append("<div class='parent both-full'><div class='child'><p class='text-center width-full font-size-18'>" + msg + ".</p></div></div>");
     }
+}
+
+function replaceArrays(string, arrayOne, arrayTwo) {
+    for (let j in arrayOne) 
+        string = string.replace(arrayOne[j], arrayTwo[j]);
+
+    return string;
 }
 
 $(document).on("click", ".singleServingLoadedEntry > div:first-of-type, .singleServingLoadedEntry > div:nth-of-type(2)", function () {
@@ -260,20 +280,12 @@ $(document).on("click", "#setGoals .buttonStyled", function () {
     alertMsgToAppend("setGoalsWhich");
 });
 
-$(document).on("change", ".displayMsgRadio", function () {
-    $(".displayMsgRadio:not(#" + $(this).attr("id") + ")").prop("checked", false);
-});
-
-$(document).on("change", ".displayMsgRadio", function () {
-    $(".displayMsgRadio:not(#" + $(this).attr("id") + ")").prop("checked", false);
-});
-
 $(document).on("click", "#continueGoalSet", function () {
-    alertMsgToAppend("setGoals" + $(this).attr("data-which"));
+    alertMsgToAppend("setGoals" + $(this).data("which"));
 });
 
 $(document).on("click", "#gramsPrecentagesSwitch p", function () {
-    $("#continueGoalSet").attr("data-which", $(this).html());
+    $("#continueGoalSet").data("which", $(this).html());
     $("#gramsPrecentagesSwitch p.active").removeClass("active");
     $(this).addClass("active");
 });
@@ -393,7 +405,7 @@ function alertMsgToAppend(fileToAppend, smoothSwitch = true, replaceWhat = [], r
         });
     }
     attributes.forEach(function (item, i) {
-        $("#alertBg").attr(item["attrName"], item["attrValue"]);
+        $("#alertBg").data(item["attrName"], item["attrValue"]);
     });
 
 
@@ -467,7 +479,7 @@ $(document).on("click", "#setServingSize", function () { //AlertMsgToAppend butt
     var fats = $("#singleFoodFats input").val().trim();
     var carbs = $("#singleFoodCarbs input").val().trim();
     var proteins = $("#singleFoodProteins input").val().trim();
-    var serving = $("#alertBg").attr("servingSize");//grams
+    var serving = $("#alertBg").data("servingSize");//grams
     var servingQuantity = $("#servingSize").val().trim();//servings
     var name = $("#foodName").val().trim().length > 0 ? $("#foodName").val().trim() : "Unnamed Entry";
     _currentMacros.fats += round(parseFloat(fats) * servingQuantity);
@@ -536,6 +548,7 @@ function isEmpty(obj) {
     return true;
 }
 
+//Used to round two decimal point
 function round(n) {
     return (Math.round(n * 100) / 100);
 }
@@ -556,30 +569,36 @@ $(document).on("change", "#foodTracker > input", function () {
 
 });
 
-
-function getDisplayDate(weekDay, month, day, year) {
-    return window.dayNames[weekDay] + ", " + window.monthNames[month] + " " + day + ", " + year;
+function getDisplayDate(date) {
+    console.log("GET DISPLAY DATE: ", date);
+    return window.dayNames[date.getDay()] + ", " + window.monthNames[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
 }
-
-function checkHistoryServings(weekDay, day, month, year) {
-    var displayDate = getDisplayDate(weekDay, month - 1, day, year);
-    var date = day + "/" + month + "/" + year;
+/*DELETE*/
+function callerName() {
+    try {
+        throw new Error();
+    }
+    catch (e) {
+        try {
+            return e.stack.split('at ')[3].split(' ')[0];
+        } catch (e) {
+            return '';
+        }
+    }
+}
+/*DELETE*/
+function checkHistoryServings(date) {
     $("#caloriesCounterHistory").removeClass("hidden");
-    $("#dayEntriesShownFor").html(displayDate).attr("day", day).attr("month", month).attr("year", year);
+    $("#dayEntriesShownFor").html(getDisplayDate(date)).data("date", date);
     if (!doesNotExist(localStorage.getItem("historyTotalMacros"))) {
         _historyTotalMacros = JSON.parse(localStorage.getItem("historyTotalMacros"));
         console.log(_historyTotalMacros);
     }
 }
 
-function returnPastDate(daysToSubtract, startDate = "", subtract = true) {
-    var d = (startDate.length > 0 ? new Date(startDate) : new Date());
-    if (subtract == true)
-        d.setDate(d.getDate() - daysToSubtract);
-    else
-        d.setDate(d.getDate() + daysToSubtract);
-
-    return d;
+function returnPastDate(daysToSubtract, startDate = new Date(), subtract = true) {
+    startDate.setDate(subtract == true ? startDate.getDate() - daysToSubtract : startDate.getDate() + daysToSubtract)
+    return startDate;
 }
 
 //Handle previous food entry display
@@ -592,12 +611,14 @@ $(document).on("mouseleave touchend", "#menu-left, #menu-right", function () {
     $(this).removeClass("btnHover");
 });
 
-$(document).on("click", "#menu-left", function () {
-    var date = returnPastDate(1, $("#dayEntriesShownFor").attr("year") + "," + $("#dayEntriesShownFor").attr("month") + "," + $("#dayEntriesShownFor").attr("day"))
-    $("#dayEntriesShownFor").html(getDisplayDate(date.getDay(), date.getMonth(), date.getDate(), date.getFullYear())).attr("year", date.getFullYear()).attr("month", date.getMonth() + 1).attr("day", date.getDate());
+$(document).on("click", "#menuHistoryServings #menu-left", function () {
+    var date = returnPastDate(1, $("#dayEntriesShownFor").data("date"));
+    $("#dayEntriesShownFor").html(getDisplayDate(date)).data("date", date);
+    console.log(date);
+    console.log(getDisplayDate(date))
     if ($("#menu-right").hasClass("hidden")) {
         var currentDate = returnPastDate(1); //yesterday date not current
-        if (date.getDate() < currentDate.getDate() && date.getMonth() == currentDate.getMonth() && date.getFullYear() == currentDate.getFullYear())
+        if (new Date(date.getFullYear(), date.getMonth(), date.getDate()) < new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
             $("#menu-right").removeClass("hidden");
     }
 
@@ -605,12 +626,12 @@ $(document).on("click", "#menu-left", function () {
 
 });
 
-$(document).on("click", "#menu-right", function () {
+$(document).on("click", "#menuHistoryServings #menu-right", function () {
     if (!$(this).hasClass("hidden")) {
-        var date = returnPastDate(1, $("#dayEntriesShownFor").attr("year") + "," + $("#dayEntriesShownFor").attr("month") + "," + $("#dayEntriesShownFor").attr("day"), false)
-        $("#dayEntriesShownFor").html(getDisplayDate(date.getDay(), date.getMonth(), date.getDate(), date.getFullYear())).attr("year", date.getFullYear()).attr("month", date.getMonth() + 1).attr("day", date.getDate());
+        var date = returnPastDate(1, $("#dayEntriesShownFor").data("date"), false);
+        $("#dayEntriesShownFor").html(getDisplayDate(date)).data("date", date);
         var currentDate = returnPastDate(1); //yesterday date not current
-        if (date.getDate() >= currentDate.getDate() && date.getMonth() == currentDate.getMonth() && date.getFullYear() == currentDate.getFullYear())
+        if ((new Date(date.getFullYear(), date.getMonth(), date.getDate()) >= new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())))
             $(this).addClass("hidden");
 
         updateOldBarWidths(date);
@@ -662,7 +683,7 @@ function updateOldBarWidths(date) {
 }
 
 $(document).on("click", ".saveEntry", function () {
-    alertMsgToAppend("addFavorites", true, ["VALUETITLE", "VALUEFATS", "VALUECARBS", "VALUEPROTEINS", "VALUEGRAMS"], [$(this).attr("title"), $(this).attr("fats"), $(this).attr("carbs"), $(this).attr("proteins"), $(this).attr("grams")]);
+    alertMsgToAppend("addFavorites", true, ["VALUETITLE", "VALUEFATS", "VALUECARBS", "VALUEPROTEINS", "VALUEGRAMS"], [$(this).data("values").title, $(this).data("values").fats, $(this).data("values").carbs, $(this).data("values").proteins, $(this).data("values").grams]);
 });
 
 $(document).on("click", "#saveItemToFavorites", function () {
@@ -680,9 +701,16 @@ $(document).on("click", "#loadServing", function () {
     var options = (_favoriteItems.length == 0 ? "" : (function () {
         var o = "";
         for (let j in _favoriteItems) {
-            o += `<div class='favoriteEntry' title="` + _favoriteItems[j].title + `" carbs='` + _favoriteItems[j].carbs + `' fats='` + _favoriteItems[j].fats + `' proteins='` + _favoriteItems[j].proteins + `' grams='` + _favoriteItems[j].grams + `'>
-                <div><p>` + _favoriteItems[j].title + `
-                </p></div><p class='deleteFavorite' index='`+ j + `'><span class='glyphicon glyphicon-trash'></span></p>
+            let tmpObj = {
+                title: _favoriteItems[j].title,
+                carbs: _favoriteItems[j].carbs,
+                fats: _favoriteItems[j].fats,
+                proteins: _favoriteItems[j].proteins,
+                grams: _favoriteItems[j].grams
+            };
+            o += `<div class='favoriteEntry' data-values='` + JSON.stringify(tmpObj) + `'>
+                <div><p>` + _favoriteItems[j].title.trim() + `
+                </p></div><p class='deleteFavorite' data-index='`+ j + `'><span class='glyphicon glyphicon-trash'></span></p>
                 </div>`;
 
         }
@@ -704,11 +732,11 @@ $(document).on("click", "#loadServing", function () {
 
 $(document).on("click", ".favoriteEntry > div", function () {
     var parent = $(this).parent();
-    $("#singleFoodServingSize > input").val(parent.attr("grams"));
-    $("#singleFoodFats > input").val(parent.attr("fats"));
-    $("#singleFoodCarbs > input").val(parent.attr("carbs"));
-    $("#singleFoodProteins > input").val(parent.attr("proteins"));
-    $("#foodName").val(parent.attr("title"));
+    $("#singleFoodServingSize > input").val(parent.data("values").grams);
+    $("#singleFoodFats > input").val(parent.data("values").fats);
+    $("#singleFoodCarbs > input").val(parent.data("values").carbs);
+    $("#singleFoodProteins > input").val(parent.data("values").proteins);
+    $("#foodName").val(parent.data("values").title);
     closeAlert();
 });
 
@@ -719,7 +747,7 @@ $(document).on("input", "#favoriteName", function () {
     } else {
         var dis = $(this);
         $(".favoriteEntry").each(function () {
-            if ($(this).attr("title").substr(0, dis.val().trim().length).toLowerCase() != dis.val().trim().toLowerCase()) {
+            if ($(this).data("values").title.substr(0, dis.val().trim().length).toLowerCase() != dis.val().trim().toLowerCase()) {
                 $(this).addClass("hidden");
             } else {
                 $(this).removeClass("hidden");
@@ -734,9 +762,9 @@ $(document).on("input", "#favoriteName", function () {
 });
 
 $(document).on("click", ".deleteFavorite", function () {
-    var indexToRemove = $(this).attr("index");
+    var indexToRemove = $(this).data("index");
     $("#titleForDelete > span").html(_favoriteItems[indexToRemove].title);
-    $("#removeFromFavorites").attr("index", indexToRemove);
+    $("#removeFromFavorites").data("index", indexToRemove);
     $("#deleteFromFavoritesConfirm").removeClass("hidden");
 
 });
@@ -747,20 +775,19 @@ $(document).on("click", "#cancelRemoveFromFavorites", function () {
 
 
 $(document).on("click", "#removeFromFavorites", function () {
-    var indexToRemove = $("#removeFromFavorites").attr("index");
+    var indexToRemove = $("#removeFromFavorites").data("index");
     _favoriteItems.splice(indexToRemove, 1);
     localStorage.setItem("favorites", JSON.stringify(_favoriteItems));
     closeAlert();
 });
 
 $(document).on("click", ".removeEntry", function () {
-    var itemId = $(this).attr("itemid");
-    console.log(itemId);
+    var itemId = $(this).data("itemId");
     alertMsgToAppend("deleteEntry", true, ["ITEMNAME", "ATTRID"], [_singleDayServing.servings[itemId].itemName, itemId]);
 });
 
 $(document).on("click", "#removeEntryFromServings", function () {
-    var indexToRemove = $(this).attr("index");
+    var indexToRemove = $(this).data("index");
     var item = _singleDayServing.servings[indexToRemove];
     var carbs = round(parseFloat(item.carbs) * parseFloat(item.servingQuantity));
     var fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
@@ -793,18 +820,25 @@ function loadWeeklyStatsGraph() {
         let singleDayServingId = window.returnKeyFromDate(pastDate);
 
         $("#xAxisDays p:nth-of-type(" + (8 - j) + ")").html(dayNames[pastDate.getDay()] + "<br/>" + pastDate.getDate());
-
+        let tmpObj = {
+            calsFats: 0,
+            calsCarbs: 0,
+            calsProteins: 0,
+            fats: 0,
+            carbs: 0,
+            proteins: 0
+        };
         if (_historyServings.hasOwnProperty(singleDayServingId)) {
-            let calsFats = round(_historyServings[singleDayServingId].fats * 9);
-            let calsCarbs = round(_historyServings[singleDayServingId].carbs * 4);
-            let calsProteins = round(_historyServings[singleDayServingId].proteins * 4);
-            let fats = getHeightForGraph(calsFats, highestCalorieCountOfLast7Days, graphMaxHeight);
-            let carbs = getHeightForGraph(calsCarbs, highestCalorieCountOfLast7Days, graphMaxHeight);
-            let proteins = getHeightForGraph(calsProteins, highestCalorieCountOfLast7Days, graphMaxHeight);
-            setGraphDivValues((8 - j), fats, carbs, proteins, graphMaxHeight, calsFats, calsCarbs, calsProteins);
+            tmpObj.calsFats = round(_historyServings[singleDayServingId].fats * 9);
+            tmpObj.calsCarbs = round(_historyServings[singleDayServingId].carbs * 4);
+            tmpObj.calsProteins = round(_historyServings[singleDayServingId].proteins * 4);
+            tmpObj.fats = getHeightForGraph(tmpObj.calsFats, highestCalorieCountOfLast7Days, graphMaxHeight);
+            tmpObj.carbs = getHeightForGraph(tmpObj.calsCarbs, highestCalorieCountOfLast7Days, graphMaxHeight);
+            tmpObj.proteins = getHeightForGraph(tmpObj.calsProteins, highestCalorieCountOfLast7Days, graphMaxHeight);
         } else {
-            setGraphDivValues((8 - j), 0, 0, 0);
+            graphMaxHeight = 0;
         }
+        setGraphDivValues((8 - j), tmpObj, graphMaxHeight);
     }
 
     if (highestCalorieCountOfLast7Days > 0) {
@@ -817,25 +851,23 @@ function loadWeeklyStatsGraph() {
     }
 }
 
-function setGraphDivValues(count, valueFats, valueCarbs, valueProteins, graphMaxHeight, calsFats, calsCarbs, calsProteins) {
-    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-fats", calsFats);
-    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-carbs", calsCarbs);
-    $("#myDopeTable > div:nth-of-type(" + count + ")").attr("data-proteins", calsProteins);
+function setGraphDivValues(count, tmpObj, graphMaxHeight) {
+    $("#myDopeTable > div:nth-of-type(" + count + ")").data("values", tmpObj);
 
     //sets graph heights
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable").css("height", valueFats + "px");
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable").css("height", valueCarbs + "px");
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable").css("height", valueProteins + "px");
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable").css("height", tmpObj.fats + "px");
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable").css("height", tmpObj.carbs + "px");
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable").css("height", tmpObj.proteins + "px");
 
 
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html((valueFats > 8 ? calsFats : "")); //min height of 8px for each block for calories text to fit in, otherwise hide
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html((valueCarbs > 8 ? calsCarbs : ""));
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html((valueProteins > 8 ? calsProteins : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:first-of-type").html((tmpObj.fats > 8 ? tmpObj.calsFats : "")); //min height of 8px for each block for calories text to fit in, otherwise hide
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:first-of-type").html((tmpObj.carbs > 8 ? tmpObj.calsCarbs : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:first-of-type").html((tmpObj.proteins > 8 ? tmpObj.calsProteins : ""));
 
 
-    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:last-of-type").html((valueFats > 23 ? parseFloat((calsFats / 9).toFixed(2)) + "g" : ""));//if height greater than 23px then can fit grams under calories
-    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:last-of-type").html((valueCarbs > 23 ? parseFloat((calsCarbs / 4).toFixed(2)) + "g" : ""));
-    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:last-of-type").html((valueProteins > 23 ? parseFloat((calsProteins / 4).toFixed(2)) + "g" : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .fatsTable p:last-of-type").html((tmpObj.fats > 23 ? parseFloat((tmpObj.calsFats / 9).toFixed(2)) + "g" : ""));//if height greater than 23px then can fit grams under calories
+    $("#myDopeTable > div:nth-of-type(" + count + ") .carbsTable p:last-of-type").html((tmpObj.carbs > 23 ? parseFloat((tmpObj.calsCarbs / 4).toFixed(2)) + "g" : ""));
+    $("#myDopeTable > div:nth-of-type(" + count + ") .proteinsTable p:last-of-type").html((tmpObj.proteins > 23 ? parseFloat((tmpObj.calsProteins / 4).toFixed(2)) + "g" : ""));
 
 
 }
@@ -889,16 +921,16 @@ $(document).on("click", "#myDopeTable > div", function () {
         $("#myDopeTable > div[data-selected='open']").removeAttr("data-selected");
         $(this).attr("data-selected", "open");
         let calories = {
-            carbs: parseFloat((parseFloat($(this).attr("data-carbs")) / 4).toFixed(2)),
-            proteins: parseFloat((parseFloat($(this).attr("data-proteins")) / 4).toFixed(2)),
-            fats: parseFloat((parseFloat($(this).attr("data-fats")) / 9).toFixed(2)),
+            carbs: parseFloat((parseFloat($(this).data("values").calsCarbs) / 4).toFixed(2)),
+            proteins: parseFloat((parseFloat($(this).data("values").calsProteins) / 4).toFixed(2)),
+            fats: parseFloat((parseFloat($(this).data("values").calsFats) / 9).toFixed(2)),
             calories: calculateCalories
         };
-        console.log(calories);
+        
         $("#graphOldValuesDisplayer > div").slideUp(250, function () {
             $("#graphOldValuesDisplayer > div > p").hide();
 
-            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p > span").html(round(calories.calories()));
+            $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(1) > p > span").html(Math.round(calories.calories()));
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(2) > p:last-of-type").html(calories.fats + "g");
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(3) > p:last-of-type").html(calories.carbs + "g");
             $("#graphOldValuesDisplayer > div > div.row > div:nth-of-type(4) > p:last-of-type").html(calories.proteins + "g");
@@ -932,21 +964,21 @@ $(document).on("click", "#header > h1", function () {
 //WORKOUT SECTION
 
 
-function checkHistoryWorkouts(weekDay, day, month, year) {
-    var displayDate = getDisplayDate(weekDay, month - 1, day, year);
-    var date = day + "/" + month + "/" + year;
-    $("#dayWorkoutsShownFor").html(displayDate).attr("day", day).attr("month", month).attr("year", year);
+function checkHistoryWorkouts(date) {
+    var displayDate = getDisplayDate(date);
+    $("#dayWorkoutsShownFor").html(displayDate).data("date", date);
     if (_historyWorkouts.length > 0) {
         alert("ok CHANGE SHIT FAM!");
     }
 }
 
 $(document).on("click", "#menuHistoryWorkouts #menu-left", function () {
-    var date = returnPastDate(1, $("#dayWorkoutsShownFor").attr("year") + "," + $("#dayWorkoutsShownFor").attr("month") + "," + $("#dayWorkoutsShownFor").attr("day"))
-    $("#dayWorkoutsShownFor").html(getDisplayDate(date.getDay(), date.getMonth(), date.getDate(), date.getFullYear())).attr("year", date.getFullYear()).attr("month", date.getMonth() + 1).attr("day", date.getDate());
+    console.log("date", $("#dayWorkoutsShownFor").data("date"));
+    var date = returnPastDate(1, $("#dayWorkoutsShownFor").data("date"));
+    $("#dayWorkoutsShownFor").html(getDisplayDate(date)).data("date", date);
     if ($("#menuHistoryWorkouts #menu-right").hasClass("hidden")) {
         var currentDate = returnPastDate(1); //yesterday date not current
-        if (date.getDate() < currentDate.getDate() && date.getMonth() == currentDate.getMonth() && date.getFullYear() == currentDate.getFullYear())
+        if (new Date(date.getFullYear(), date.getMonth(), date.getDate()) < new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
             $("#menuHistoryWorkouts #menu-right").removeClass("hidden");
     }
 
@@ -956,10 +988,10 @@ $(document).on("click", "#menuHistoryWorkouts #menu-left", function () {
 
 $(document).on("click", "#menuHistoryWorkouts #menu-right", function () {
     if (!$(this).hasClass("hidden")) {
-        var date = returnPastDate(1, $("#dayWorkoutsShownFor").attr("year") + "," + $("#dayWorkoutsShownFor").attr("month") + "," + $("#dayWorkoutsShownFor").attr("day"), false)
-        $("#dayWorkoutsShownFor").html(getDisplayDate(date.getDay(), date.getMonth(), date.getDate(), date.getFullYear())).attr("year", date.getFullYear()).attr("month", date.getMonth() + 1).attr("day", date.getDate());
+        var date = returnPastDate(1, $("#dayWorkoutsShownFor").data("date"), false)
+        $("#dayWorkoutsShownFor").html(getDisplayDate(date)).data("date", date);
         var currentDate = returnPastDate(1); //yesterday date not current
-        if (date.getDate() >= currentDate.getDate() && date.getMonth() == currentDate.getMonth() && date.getFullYear() == currentDate.getFullYear())
+        if (new Date(date.getFullYear(), date.getMonth(), date.getDate()) >= new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
             $(this).addClass("hidden");
 
         updateOldWorkoutSection(date);
@@ -1037,7 +1069,7 @@ $(document).on("click", "#addWorkoutBtn", function () {
 
 
 $(document).on("click", ".addSetBtn", function () {
-    var exerciseID = $(this).attr("data-id");
+    var exerciseID = $(this).data("id");
 
     alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
 });
