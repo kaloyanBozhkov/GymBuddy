@@ -112,6 +112,8 @@ function loadContent(what) {//initializes one part of the app vs the other
                 checkHistoryWorkouts(d);
                 localStorage.setItem("lastOpened", "workouts");
                 loadWorkoutsForToday();
+                //Add iterator to _exercises object to have direct access to its property values
+                addIteratorToObject(_exercises);
             }
         });
     } else {
@@ -170,7 +172,7 @@ function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServ
             let item = singleDayServing.servings[j];
             let hideLast = (j == 0 ? "" : "hidden");
 
-            let calories = window.calculateCalories.call(item) * parseFloat(item.servingQuantity);
+            let calories = round(window.calculateCalories.call(item) * parseFloat(item.servingQuantity));
             let proteins = round(parseFloat(item.proteins) * parseFloat(item.servingQuantity));
             let carbs = round(parseFloat(item.carbs) * parseFloat(item.servingQuantity));
             let fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
@@ -412,10 +414,11 @@ function alertMsgToAppend(fileToAppend, smoothSwitch = true, replaceWhat = [], r
 }
 
 //Track Food Section 
-$(document).on("input", "#foodName", function () {
+$(document).on("input", "#foodName, #itemName", function () {
     $(this).val(camelCaseInput($(this).val()));
 });
 
+//Instead of CSS's text-transform: capitalize; JUST BECAUSE JS IS DOPER.
 function camelCaseInput(string) {
     var camel = "";
     var lastLetter = string.substr(string.length - 1) == " " ? " " : "";
@@ -438,27 +441,30 @@ $(document).on("focusout", "#foodName", function () {
     $(this).attr("placeholder", "Type Food Name Here");
 });
 
-$(document).on("input", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
+$(document).on("input", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
     if ($(this).val().trim() == ".")
         $(this).val("0.");
 });
 
-$(document).on("focusin", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
+$(document).on("focusin", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
     if ($(this).val().trim() == "0")
         $(this).val("");
 });
 
-$(document).on("focusout", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input", function () {
+$(document).on("focusout", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
     if ($(this).val().trim().length <= 0)
         $(this).val("0");
+
+    if ($(this).val().trim().indexOf(".") == 0)
+        $(this).val("0" + $(this).val());
 });
 
 $(document).on("click", "#addServing", function () {
     var serving = $("#singleFoodServingSize input").val().trim();
     if (_totalMacros.calculateCalories() > 0) {
         if (serving.length > 0 && serving !== "0") {
-            var name = $("#foodName").val().trim().length > 0 ? $("#foodName").val().trim() : "Unnamed Entry";
+            var name = $("#foodName").val().trim().length > 0 ? $("#foodName").val().trim() : "Unnamed";
             alertMsgToAppend("setServingSize", true, ["GRAMS", "FOODNAME"], [serving, name], [
                 {
                     attrName: "servingSize",
@@ -740,26 +746,43 @@ $(document).on("click", ".favoriteEntry > div", function () {
     closeAlert();
 });
 
-$(document).on("input", "#favoriteName", function () {
-    $(this).val(camelCaseInput($(this).val()));
-    if ($(this).val().trim().length == 0) {
-        $(".favoriteEntry.hidden").removeClass("hidden");
+$(document).on("input", "#favoriteName, #exerciseList", function () {
+    let optionElementClass = "";
+    let optionContainer = "";
+    switch ($(this).attr("id")) {
+        case "favoriteName":
+            optionElementClass = ".favoriteEntry";
+            optionContainer = "#favoriteSelect";
+            break;
+        case "exerciseList":
+            optionElementClass = ".workoutEntry";
+            optionContainer = "#exerciseSelect";
+            break;
+    }
+    searchThroughList(optionElementClass, optionContainer, $(this));
+});
+
+function searchThroughList(optionElementClass, optionContainer, dis) {
+    dis.val(camelCaseInput(dis.val()));
+    if (dis.val().trim().length == 0) {
+        $(optionElementClass + ".hidden").removeClass("hidden");
     } else {
-        var dis = $(this);
-        $(".favoriteEntry").each(function () {
-            if ($(this).data("values").title.substr(0, dis.val().trim().length).toLowerCase() != dis.val().trim().toLowerCase()) {
+        $(optionElementClass).each(function () {
+            let vals = $(this).data("values");
+            if ((vals.hasOwnProperty("title") && vals.title.toLowerCase().indexOf(dis.val().trim().toLowerCase()) == -1) ||
+                (vals.hasOwnProperty("name") && vals.name.toLowerCase().indexOf(dis.val().trim().toLowerCase()) == -1)){
                 $(this).addClass("hidden");
             } else {
                 $(this).removeClass("hidden");
             }
         });
     }
-    if ($(".favoriteEntry:not(.hidden)").length == 0) {
-        $("#favoriteSelect > p").removeClass("hidden");
+    if ($(optionElementClass + ":not(.hidden)").length == 0) {
+        $(optionContainer + " > p").removeClass("hidden");
     } else {
-        $("#favoriteSelect > p").addClass("hidden");
+        $(optionContainer + " > p").addClass("hidden");
     }
-});
+}
 
 $(document).on("click", ".deleteFavorite", function () {
     var indexToRemove = $(this).data("index");
@@ -835,8 +858,6 @@ function loadWeeklyStatsGraph() {
             tmpObj.fats = getHeightForGraph(tmpObj.calsFats, highestCalorieCountOfLast7Days, graphMaxHeight);
             tmpObj.carbs = getHeightForGraph(tmpObj.calsCarbs, highestCalorieCountOfLast7Days, graphMaxHeight);
             tmpObj.proteins = getHeightForGraph(tmpObj.calsProteins, highestCalorieCountOfLast7Days, graphMaxHeight);
-        } else {
-            graphMaxHeight = 0;
         }
         setGraphDivValues((8 - j), tmpObj, graphMaxHeight);
     }
@@ -1003,6 +1024,7 @@ function updateOldWorkoutSection(date) {
 }
 
 function loadWorkoutsForToday() {
+    console.log(_historyWorkouts);
     let todayDate = window.returnKeyFromDate(new Date());
     if (_historyWorkouts.hasOwnProperty(todayDate)) {
         //check if for TODAY there is any workouts saved already, if soooo load them!
@@ -1052,24 +1074,109 @@ function loadWorkoutsForToday() {
 
 $(document).on("click", "#addWorkoutBtn", function () {
     //show msgbox for new workout
-
-    //add new one
-    let exercise = new singleExercise(1);
-
-    let todayDate = window.returnKeyFromDate(new Date());
+    var options = (Object.keys(_exercises).length == 0 ? "" : (function () {
+        var o = "";
+        for (let property of _exercises) {
+            o += `<div class='workoutEntry' data-values='` + JSON.stringify(property) + `'>
+                <div><p>` + property.name + `
+                </p></div><p class='deleteWorkout' data-exercise-id='`+ property.exerciseID + `'><span class='glyphicon glyphicon-trash'></span></p>
+                </div>`;
+        }
+        return o;
+    }));
+    var hidden1 = "hidden";
+    var hidden2 = "hidden";
+    if (Object.keys(_exercises).length == 0) {
+        hidden2 = "";
+    } else {
+        hidden1 = "";
+    }
+    alertMsgToAppend("addNewExercise", true, ["HIDDEN1", "HIDDEN2", "OPTIONS"], [hidden1, hidden2, options]);
+});
+//creation key var highestKey = parseFloat(Object.keys(_exercises)[Object.keys(_exercises).length - 1]) + 1;
+$(document).on("click", ".workoutEntry > div", function () {
+    var exercise = new singleExercise($(this).parent().data("values").exerciseID);
+    var todayDate = window.returnKeyFromDate(new Date());
     if (_historyWorkouts.hasOwnProperty(todayDate)) {
-        _historyWorkouts[todayDate].push(exercise);
+        let exerciseExistsAlready = false;
+        for (let singleExercise in _historyWorkouts[todayDate]){
+            if (singleExercise.name == exercise.name) {
+                exerciseExistsAlready = true;
+                break;
+            }
+        }
+        if (!exerciseExistsAlready) {
+            _historyWorkouts[todayDate].push(exercise);
+            loadWorkoutsForToday();
+            closeAlert();
+        }
+        else {
+            $("#addExistingExercise #titleForDelete span").append(_exercises[exercise.exerciseID].name);
+            $("#addExistingExercise #yesAddExerciseAgain").data("exerciseId", exercise.exerciseID);
+            $("#addExistingExercise").removeClass("hidden");
+        }
     } else {
         _historyWorkouts[todayDate] = [exercise];
+        loadWorkoutsForToday();
+        closeAlert();
     }
-
-    console.log("_historyWorkouts", _historyWorkouts);
-    loadWorkoutsForToday();
 });
 
+$(document).on("click", ".deleteWorkout", function () {
+    var exerciseID = $(this).data("exerciseId");
+    $("#deleteFromWorkoutsConfirm #removeFromWorkouts").data("exerciseId", exerciseID);
+    $("#deleteFromWorkoutsConfirm #titleForDelete span").empty().append(_exercises[exerciseID].name);
+    $("#deleteFromWorkoutsConfirm").removeClass("hidden");
+});
+
+$(document).on("click", "#cancelRemoveFromWorkouts", function () {
+    $("#deleteFromWorkoutsConfirm").addClass("hidden");
+});
+
+$(document).on("click", "#noDoNotAddExerciseAgain", function () {
+    $("#addExistingExercise").addClass("hidden");
+});
+
+$(document).on("click", "#yesAddExerciseAgain", function () {
+    var exercise = new singleExercise($(this).data("exerciseId"));
+    var todayDate = window.returnKeyFromDate(new Date());
+    _historyWorkouts[todayDate].push(exercise);
+    $("#deleteFromWorkoutsConfirm").addClass("hidden");
+    loadWorkoutsForToday();
+    closeAlert();
+});
+
+$(document).on("click", "#removeFromWorkouts", function () {
+    printSingleExerciseArray();
+    var exerciseIDToDelete = $(this).data("exerciseId");
+    if (!_historyWorkouts.hasOwnProperty(Symbol.iterator)) 
+        addIteratorToObject(_historyWorkouts);
+
+    for (let singleExerciseArray of _historyWorkouts) {
+       
+    }
+    printSingleExerciseArray();
+
+    delete _exercises[exerciseIDToDelete];
+    console.log("_exercises after removing deleted item", _exercises);
+    saveExercises();
+});
 
 $(document).on("click", ".addSetBtn", function () {
     var exerciseID = $(this).data("id");
 
     alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
 });
+
+function saveExercises() {
+    //save exercises in order to localstorage here
+}
+
+function deleteFrom () {
+    if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
+        addIteratorToObject(_historyWorkouts);
+
+    for (let singleExerciseArray of _historyWorkouts) {
+        console.log(singleExerciseArray);
+    }
+}

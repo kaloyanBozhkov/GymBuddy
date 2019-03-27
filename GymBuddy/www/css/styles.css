@@ -275,7 +275,6 @@ body *:not(.glyphicon) {
 }
 
 .separator {
-    margin-top: 20px;
     width: 60%;
     margin-left: 20%;
     height: 1px;
@@ -349,25 +348,62 @@ body *:not(.glyphicon) {
     }
 }
 
-#displayMessage > h3:first-of-type:not(.break-word) {
-    word-break: break-all;
-}
-
 #displayMessage > h3:first-of-type {
+    word-break: break-word;
+    text-transform: capitalize;
+    font-size: 22px;
+    border-bottom: 1px solid #a59fa1;
+    padding-bottom: 5px;
     width: 100%;
+    margin-bottom: 10px;
+    margin-top: 0;
 }
 
-#displayMessage h3:not(.textNextToRadioOnAlert) {
-    margin: 0;
-}
-
-#setGoalsInputs, #setGoalsInputsTwo {
+.tableStyling, #setGoalsInputsTwo {
     margin-top: 10px;
 }
 
+.tableStyling h3 {
+    line-height: 35px;
+    margin: 0;
+}
 
+#setGoalsInputs span.gText {
+    display: inline-block;
+    width: 10%;
+    font-size: 25px;
+    vertical-align: middle;
+    margin-right: 0px;
+    margin-right: calc(20px - 10px);
+}
 
-#setGoalsInputs input, .alertServings #servingSize {
+#setGoalsInputs input {
+    display: inline-block;
+    width: 90%;
+    width: calc(90% - 10px);
+    margin-bottom: 10px;
+    vertical-align: middle;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 35px;
+    text-align: right;
+    margin: 0;
+    padding-right: 10px;
+}
+.inputStyling input {
+    margin-bottom: 10px;
+    vertical-align: top;
+    border: none;
+    outline: none;
+    max-width: 160px;
+    background-color: transparent;
+    font-size: 20px;
+    text-align: center;
+    border-bottom: 1px dashed #a59fa1;
+}
+
+.alertServings #servingSize {
     margin-bottom: 10px;
     vertical-align: top;
     border: none;
@@ -379,21 +415,22 @@ body *:not(.glyphicon) {
     border-bottom: 1px solid #a59fa1;
 }
 
-#setGoalsInputs table {
+.tableStyling table {
     max-width: 360px;
     margin: 0 auto;
 }
 
-#setGoalsInputs table tr td{
+.tableStyling table tr td {
     width: 50%;
 }
 
-#setGoalsInputs table tr td:last-of-type {
+.tableStyling table tr td:last-of-type {
     text-align: right;
 }
 
-#setGoalsInputs table tr td input {
+.tableStyling table tr td input {
     width: 100%;
+    margin: 0;
 }
 
 @media (min-width: 300px){
@@ -408,10 +445,6 @@ body *:not(.glyphicon) {
     width: 48%;
 } 
 
-#displayMessage .separator {
-    margin-bottom: 3px;
-}
-
 #displayMessage label {
     font-size: 22px;
     padding-left: 10px;
@@ -421,10 +454,6 @@ body *:not(.glyphicon) {
     margin-bottom: 0px;
     margin-left: 5px;
     margin-top: 10px;
-}
-
-.separatorMarginBottom{
-    margin-bottom: 10px!important;
 }
 
 .errorMsg{
@@ -472,25 +501,22 @@ body *:not(.glyphicon) {
     max-width: 55px;
 }
 @media (max-width: 326px){
-    #displayMessage > h3:first-of-type {
-        font-size: 22px;
-    }
-
     #gramsPrecentagesSwitch p {
         font-size:18px
     }
 }
-
+#setGoalsInputsTwo h3 {
+    margin: 10px 0px;
+}
 #setGoalsInputsTwo input {
     max-width:170px;
-    margin-bottom: 10px;
     vertical-align: top;
     border: none;
     outline: none;
     background-color: transparent;
     font-size: 20px;
     text-align: center;
-    border-bottom: 1px solid #a59fa1;
+    border-bottom: 1px dashed #a59fa1;
 }
 
 #setGoalsInputsTwo tr:not(:first-of-type) h3:not(.percentageSign) {
@@ -510,13 +536,13 @@ body *:not(.glyphicon) {
 #foodTracker h3, #foodTracker .macroBlock p {
     margin: 0;
 }
-#favoriteName {
-    font-size:25px;
+#favoriteName, #exerciseList {
+    font-size: 25px;
 }
 #foodName {
     font-size: 24px;
 }
-#foodName, #favoriteName {
+#foodName, #favoriteName, #exerciseList {
     margin: 0 auto;
     width: 80%;
     border: none;
@@ -524,9 +550,9 @@ body *:not(.glyphicon) {
     border-bottom: 1px solid #a59fa1;
 }
 
-#foodName:focus, .macroBlock input:focus, #favoriteName:focus {
-    outline: none;
-}
+    #foodName:focus, .macroBlock input:focus, #favoriteName:focus, #exerciseList:focus {
+        outline: none;
+    }
 
 #singleFoodServingSize p, #singleFoodServingSize input{
     margin: 0 auto;
@@ -551,19 +577,23 @@ body *:not(.glyphicon) {
     width: 100%;
 }
 
-.macroBlock p{
+#loadServing{
+    margin-bottom:0;
+}
+
+.macroBlock p {
     font-size: 16px;
 }
 
-#singleFoodFats input, .fatsRed {
+.fatsRed {
     color: #E96C66;
 }
 
-#singleFoodProteins input, .proteinsGreen {
+.proteinsGreen {
     color: #9cc14d;
 }
 
-#singleFoodCarbs input, .carbsOrange {
+.carbsOrange {
     color: #e5a877;
 }
 
@@ -855,53 +885,63 @@ body *:not(.glyphicon) {
     width: 40px;
 }
 
-#favoriteName {
-    margin-top: 5px;
-}
-input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeholder {
+input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeholder, input#exerciseList:focus::placeholder {
     font-size: 0;
 }
 @media (max-height: 420px) {
-    #favoriteSelect {
+    #favoriteSelect, #exerciseSelect {
         max-height: 150px !important;
     }
 }
 
 
 @media (max-height: 520px) and (min-height:421px){
-    #favoriteSelect {
-        max-height: 250px!important;
+    #favoriteSelect, #exerciseSelect {
+        max-height: 250px !important;
     }
 }
 
-#favoriteSelect{
+.alertExercises #createNewExercise {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+#favoriteSelect, #exerciseSelect {
     max-height: 350px;
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-#favoriteSelect > div.favoriteEntry p {
+#favoriteSelect > p, #exerciseSelect > p {
+    line-height: 30px;
+    margin: 0;
+}
+
+#favoriteSelect > div.favoriteEntry p, #exerciseSelect > div.workoutEntry p {
     padding: 5px 10px;
     margin: 0px;
     line-height: 20px;
 }
 
-#favoriteSelect > div.favoriteEntry:hover p {
+#favoriteSelect > div.favoriteEntry:hover p, #exerciseSelect > div.workoutEntry:hover p {
     background-color: #e2e2e2;
 }
 
-#favoriteSelect > div.favoriteEntry > div {
+#favoriteSelect > div.favoriteEntry > div, #exerciseSelect > div.workoutEntry > div {
     width: 80%;
     display: inline-block;
     vertical-align: top;
 }
 
-#favoriteSelect > div.favoriteEntry > div > p:not(.deleteFavorite) {
+#favoriteSelect > div.favoriteEntry > div > p:not(.deleteFavorite), #exerciseSelect > div.workoutEntry > div > p:not(.deleteWorkout) {
     font-size: 22px;
-    overflow-y:hidden;
+    overflow-y: hidden;
     overflow-x: auto;
 }
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite {
+
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite, #exerciseSelect > div.workoutEntry > p.deleteWorkout {
     font-size: 18px;
     width: 20%;
     display: inline-block;
@@ -909,26 +949,27 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     text-align: right;
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout > span {
     opacity: 0.7;
     transition: all 100ms;
     transform-origin: center;
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite:hover > span {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite:hover > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout:hover > span {
     opacity: 1;
     transform: rotate(9deg);
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout > span {
     vertical-align: middle;
-    right:2px;
+    right: 2px;
 }
+
 #titleForDelete span {
     font-weight: 900;
     opacity: 0.6;
 }
-#deleteFromFavoritesConfirm {
+#deleteFromFavoritesConfirm, #deleteFromWorkoutsConfirm, #addExistingExercise {
     top: 50%;
     left: 0;
     right: 0;
@@ -937,10 +978,11 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     transform: translateY(-50%);
 }
 
-#deleteFromFavoritesConfirm .buttonStyled {
+#deleteFromFavoritesConfirm .buttonStyled, #deleteFromWorkoutsConfirm .buttonStyled, #addExistingExercise .buttonStyled, #deleteFromWorkoutsConfirm .buttonStyled {
     margin: 0;
 }
-#deleteFromFavoritesConfirm > div > div {
+
+#deleteFromFavoritesConfirm > div > div, #deleteFromWorkoutsConfirm > div > div, #addExistingExercise > div > div, #deleteFromWorkoutsConfirm > div > div {
     width: 95%;
     margin: auto;
     padding: 10px;
@@ -1159,7 +1201,6 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     padding: 10px;
 }
 
-
 .individualExercise .workoutHeader h3 {
     padding-bottom: 10px;
     border-bottom: 1px solid #a59fa1;
@@ -1283,13 +1324,17 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     font-size: 15px;
 }
 
+#setAddSet h3{
+    margin: 10px 0px;
+}
+
 #setAddSet input {
     border: none;
     outline: none;
     background-color: transparent;
     font-size: 20px;
     text-align: center;
-    border-bottom: 1px solid #a59fa1;
+    border-bottom: 1px dashed #a59fa1;
     width: 60px;
 }
 

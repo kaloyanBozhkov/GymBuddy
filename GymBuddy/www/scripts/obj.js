@@ -4,7 +4,7 @@ var _totalMacros, _currentMacros, _historyServings, _singleDayServing, _historyT
 //not using .toDateString in case of language translation in future.
 var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 var dayNames = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
-var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet"];
+var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise"];
 var _msgBox = {};
 
 //Macros Object
@@ -83,9 +83,11 @@ _historyTotalMacros = {};
 //workouts
 var _historyWorkouts = {};
 var _exercises = {
-    1: new exercise(1, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
+    0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
 
-};//key is id, value is exercise obj. These are the saved exercise names and records
+
+//key is id, value is exercise obj. These are the saved exercise names and records
+};
 var _dailyExercises = {}; //these are the exercises for each day
 
 function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 0, bestTime = 0) { //saved exercise
@@ -130,3 +132,23 @@ function returnKeyFromDate(date) {//used to generate keys and date format, not u
     return date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
 }
 
+
+function addIteratorToObject(obj) {
+    Object.defineProperty(obj, Symbol.iterator, {
+        enumerable: false,
+        configurable: false,
+        value: function () {
+            var o = this;
+            var id = 0;
+            var keys = Object.keys(o);
+            return {
+                next: function () {
+                    return {
+                        value: o[keys[id++]],
+                        done: (id > keys.length)
+                    }
+                }
+            }
+        }
+    });
+}
