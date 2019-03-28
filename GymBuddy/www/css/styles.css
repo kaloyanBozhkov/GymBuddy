@@ -428,7 +428,7 @@ body *:not(.glyphicon) {
     text-align: right;
 }
 
-.tableStyling table tr td input {
+.tableStyling table tr td input:not([type="radio"]) {
     width: 100%;
     margin: 0;
 }
@@ -494,8 +494,9 @@ body *:not(.glyphicon) {
 }
 
 #setGoalsInputsTwo table tr:first-of-type input{
-    margin-right:10%;
     max-width:170px;
+    width:90%;
+    margin-right:5%;
 }
 #setGoalsInputsTwo table tr:not(:first-of-type) input {
     max-width: 55px;
@@ -914,6 +915,12 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     overflow-y: auto;
 }
 
+#favoriteSelect::after, #exerciseSelect::after {
+    content: '(hold to edit)';
+    display: block;
+    text-align: center;
+}
+
 #favoriteSelect > p, #exerciseSelect > p {
     line-height: 30px;
     margin: 0;
@@ -1169,13 +1176,13 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
 
 #addWorkoutBtn::before, #addWorkoutBtn > div {
     width: 50px;
-    height: 15px;
+    height: 16px;
     top: 50%;
     transform: translateY(-50%);
 }
 
 #addWorkoutBtn::after {
-    width: 15px;
+    width: 16px;
     height: 50px;
     top: 0;
 }
@@ -1358,4 +1365,101 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
 
 #setAddSet table tr td:last-of-type {
     text-align: right;
+}
+
+.selectStyle {
+    border: none;
+    background-color: transparent;
+    border-bottom: 1px dashed #a59fa1;
+}
+
+td.withPlaceholder:not(.hasValue)::after {
+    content: attr(data-placeholder);
+    display: block;
+    position: absolute;
+    top: 50%;
+    font-size: 18px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    line-height: 100%;
+    transform: translateY(-50%);
+    transition: all 400ms;
+    z-index:-1;
+}
+
+td.withPlaceholder:focus::after, td.withPlaceholder:hover::after, td.withPlaceholder:active::after {
+    opacity: 0;
+    transform: translateY(-100%);
+}
+
+.h3To22 h3{
+    font-size: 22px;
+}
+
+.optionCategory h3 {
+    text-align: left;
+    font-size: 20px;
+}
+.optionCategory h3 span {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.categoryTable{
+    max-height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.categoryTable table tbody tr td:first-of-type {
+    padding-left: 35px;
+    text-align: left;
+}
+.categoryTable tr td h3 {
+    display: inline-block;
+    line-height: 25px;
+    border-bottom: 1px dashed #a59fa1;
+    margin-bottom: 5px;
+}
+.categoryTable tr td {
+    width: 50%;
+}
+.categoryTable tr td p {
+    width: 100%;
+    overflow-y: hidden;
+    overflow-x: auto;
+    margin: 0;
+    max-height: 50px;
+    text-align: left;
+    overflow: auto;
+}
+
+.optionCategory:focus, .optionCategory:hover, .optionCategory:active{
+    background-color: #dcdcdc;
+}
+
+.optionCategory input[type="radio"] {
+    position: absolute;
+    left: -25px;
+    top: 0;
+    height: 100%;
+    margin: 0;
+}
+
+#addNewCategory {
+    font-size: 15px;
+    padding: 15px;
+    margin: 5px;
+    border: 1px dashed transparent;
+    border-radius: 50%;
+}
+
+#addNewCategory:focus, #addNewCategory:active, #addNewCategory:hover {
+    border: 1px dashed #a59fa1;
+}
+
+#addNewCategory::before {
+    top: 1px;
+    left: 1px;
+    position: relative;
 }

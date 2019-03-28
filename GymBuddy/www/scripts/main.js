@@ -121,6 +121,12 @@ function loadContent(what) {//initializes one part of the app vs the other
                     setDefaultExercises();
                 }
 
+                if (!doesNotExist(localStorage.getItem("_exerciseCategories"))) {
+                    _exerciseCategories = JSON.parse(localStorage.getItem("_exerciseCategories"));
+                } else {
+                    setDefaultCategories();
+                }
+
                 loadWorkoutsForToday();
                 //Add iterator to _exercises object to have direct access to its property values
                 addIteratorToObject(_exercises);
@@ -442,8 +448,8 @@ function alertMsgToAppend(fileToAppend, smoothSwitch = true, replaceWhat = [], r
     });
 }
 
-//Track Food Section 
-$(document).on("input", "#foodName, #itemName", function () {
+//for any input with title-like requirements
+$(document).on("input", ".camelCaseInput", function () {
     $(this).val(camelCaseInput($(this).val()));
 });
 
@@ -1102,6 +1108,11 @@ function loadWorkoutsForToday() {
 }
 
 $(document).on("click", "#addWorkoutBtn", function () {
+    addNewExercise();
+});
+
+//separate function in order for lastAlertOpened to be able to fire it for re-opening automatically when sub-alert is closed
+function addNewExercise() {
     //show msgbox for new workout
     var options = (Object.keys(_exercises).length == 0 ? "" : (function () {
         var o = "";
@@ -1121,7 +1132,8 @@ $(document).on("click", "#addWorkoutBtn", function () {
         hidden1 = "";
     }
     alertMsgToAppend("addNewExercise", true, ["HIDDEN1", "HIDDEN2", "OPTIONS"], [hidden1, hidden2, options]);
-});
+}
+
 //creation key var highestKey = parseFloat(Object.keys(_exercises)[Object.keys(_exercises).length - 1]) + 1;
 $(document).on("click", ".workoutEntry > div", function () {
     var exercise = new singleExercise($(this).parent().data("values").exerciseID);
@@ -1216,12 +1228,10 @@ $(document).on("click", "#removeFromWorkouts", function () {
     saveExercises();
     loadWorkoutsForToday();
     closeMiniAlert();
-
 });
 
 $(document).on("click", ".addSetBtn", function () {
     var exerciseID = $(this).data("id");
-
     alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
 });
 
@@ -1234,22 +1244,82 @@ function saveHistoryWorkouts() {
     localStorage.setItem("_historyWorkouts", JSON.stringify(_historyWorkouts));
 }
 
+//On close of alert with name of key, open alert in value
+var previousAlertToShow = {
+    "createExercise": addNewExercise
+};
 
+$(document).on("click", "#createNewExercise", function () {
+    var categoryRows = "";
+    if (Object.keys(_exerciseCategories).length > 0) {
+        if (!_exerciseCategories.hasOwnProperty(Symbol.iterator))//add iterator to object if it does not have one already
+            addIteratorToObject(_exerciseCategories);
 
-
-
-
-
-
-
-
-
-
-
-
+        var isFirstRow = true;
+        for (let exerciseCategory of _exerciseCategories) {
+            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory.obj) + `'>
+                        <td>
+                            <div class='position-relative'>
+                                <input type="radio" name="category" ` + (isFirstRow ? "checked" : "") +`>
+                                <h3>` + exerciseCategory.obj.title + `</h3>
+                            </div>
+                            <p>`+ exerciseCategory.obj.description +`</p>
+                        </td>
+                    </tr>`;
+            isFirstRow = false;
+        }
+    } else {
+        categoryRows += `<tr>
+                <td class='optionCategory'><h3>No categories created yet.</h3></td>
+                    </tr>`;
+    }
+    alertMsgToAppend("createExercise", true, ["<!--CATEGORYOPTIONS-->"], [categoryRows]);
+})
 
 function setDefaultExercises() {
     _exercises = {
         0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
     }
 }
+function setDefaultCategories() {
+    _exerciseCategories = {
+        0: { title: "Shoulders", description: "These are the exercises related to the shoulders." },
+        1: { title: "Triceps", description: "These are the exercises related to the triceps." },
+        2: { title: "Biceps", description: "These are the exercises related to the biceps." },
+        3: { title: "Chest", description: "These are the exercises related to the chest." },
+        4: { title: "Back", description: "These are the exercises related to the back." },
+        5: { title: "Legs", description: "These are the exercises related to the legs." },
+        6: { title: "Abs", description: "These are the exercises related to the abs." }
+    };
+}
+
+$(document).on("input keydown focusout blur", "td.position-relative > input", function () {
+    if ($(this).val().trim().length == 0) {
+        $(this).parent().removeClass("hasValue");
+    } else {
+        $(this).parent().addClass("hasValue");
+    }
+});
+
+$(document).on("click", ".optionCategory", function () {
+    $(this).children().children().children("input[type='radio']").prop("checked", true);
+});
+
+//Hold optionCategory for edit
+var holdTimer;
+$(document).on("mousedown touchstart", ".optionCategory", function () {
+    var categoryObj = $(this).data("category");
+    holdTimer = window.setTimeout(function () { 
+        editOptionCategory(categoryObj);
+    }, 1000);
+});
+
+$(document).on("mouseup touchend", ".optionCategory", function () {
+    if (holdTimer)
+        window.clearTimeout(holdTimer);
+});
+
+function editOptionCategory(categoryObj) {
+    
+}
+

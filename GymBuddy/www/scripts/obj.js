@@ -4,7 +4,7 @@ var _totalMacros, _currentMacros, _historyServings, _singleDayServing, _historyT
 //not using .toDateString in case of language translation in future.
 var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 var dayNames = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
-var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise"];
+var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise", "createExercise"];
 var _msgBox = {};
 
 //Macros Object
@@ -85,10 +85,12 @@ var _historyWorkouts = {};
 var _exercises = {//key is id, value is exercise obj. These are the saved exercise names and records
 };
 var _dailyExercises = {}; //these are the exercises for each day
+var _exerciseCategories = {}; //category ID, { title, description }
 
 function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 0, bestTime = 0) { //saved exercise
     this.name = name;
     this.exerciseID = ID;
+    this.categoryID = category;
     this.comment = description; 
     this.maxWeight = maxWeight;
     this.maxReps = maxReps;
