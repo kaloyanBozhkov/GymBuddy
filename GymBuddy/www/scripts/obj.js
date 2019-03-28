@@ -82,11 +82,7 @@ _historyTotalMacros = {};
 
 //workouts
 var _historyWorkouts = {};
-var _exercises = {
-    0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
-
-
-//key is id, value is exercise obj. These are the saved exercise names and records
+var _exercises = {//key is id, value is exercise obj. These are the saved exercise names and records
 };
 var _dailyExercises = {}; //these are the exercises for each day
 
@@ -143,8 +139,12 @@ function addIteratorToObject(obj) {
             var keys = Object.keys(o);
             return {
                 next: function () {
+                    let key = keys[id++];
                     return {
-                        value: o[keys[id++]],
+                        value: {
+                            obj: o[key],
+                            relativeKey: key
+                        },
                         done: (id > keys.length)
                     }
                 }

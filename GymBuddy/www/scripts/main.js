@@ -111,6 +111,16 @@ function loadContent(what) {//initializes one part of the app vs the other
             } else {//workouts
                 checkHistoryWorkouts(d);
                 localStorage.setItem("lastOpened", "workouts");
+
+                if (!doesNotExist(localStorage.getItem("_historyWorkouts")))
+                    _historyWorkouts = JSON.parse(localStorage.getItem("_historyWorkouts"));
+
+                if (!doesNotExist(localStorage.getItem("_exercises"), false)) {
+                    _exercises = JSON.parse(localStorage.getItem("_exercises"));
+                } else {
+                    setDefaultExercises();
+                }
+
                 loadWorkoutsForToday();
                 //Add iterator to _exercises object to have direct access to its property values
                 addIteratorToObject(_exercises);
@@ -344,6 +354,27 @@ function closeAlert() {
     });
 }
 
+function closeAlert() {
+    $("#alertBg").animate({
+        "opacity": "0"
+    }, 100, function () {
+        setTimeout(function () {
+            $("#alertBg").remove();
+        }, 150);
+    });
+}
+
+function closeMiniAlert() {
+    var miniAlert = $("#alertBg .position-fixed:not(.hidden)");
+    miniAlert.animate({
+        "opacity": "0"
+    }, 100, function () {
+        setTimeout(function () {
+            miniAlert.addClass("hidden");
+        }, 150);
+    });
+}
+
 $(document).on("input", "#fatsCount, #proteinsCount, #carbsCount", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
     if ($(this).val() > 500)
@@ -409,8 +440,6 @@ function alertMsgToAppend(fileToAppend, smoothSwitch = true, replaceWhat = [], r
     attributes.forEach(function (item, i) {
         $("#alertBg").data(item["attrName"], item["attrValue"]);
     });
-
-
 }
 
 //Track Food Section 
@@ -964,8 +993,8 @@ $(document).on("click", "#myDopeTable > div", function () {
 });
 
 
-function doesNotExist(item) {
-    return (item === null || typeof item == "undefined" || item.length <= 2);//null is primitive type but typeof returns Object (a JS unsolvable bug)
+function doesNotExist(item, checkIfEmptyObject = true) {
+    return (item === null || typeof item == "undefined" || (checkIfEmptyObject && item.length <= 2));//null is primitive type but typeof returns Object (a JS unsolvable bug)
 }
 //remove after publish
 function countObjectItems(obj) {
@@ -1024,8 +1053,8 @@ function updateOldWorkoutSection(date) {
 }
 
 function loadWorkoutsForToday() {
-    console.log(_historyWorkouts);
     let todayDate = window.returnKeyFromDate(new Date());
+    $("#workoutsToday").empty();
     if (_historyWorkouts.hasOwnProperty(todayDate)) {
         //check if for TODAY there is any workouts saved already, if soooo load them!
         var div = "";
@@ -1064,7 +1093,7 @@ function loadWorkoutsForToday() {
              }
              div.replace("SETS", setsDiv);
         }
-        $("#workoutsToday").empty().append(div);
+        $("#workoutsToday").append(div);
         $("#exercisesMsg").addClass("hidden");
     } else {
         //no workouts for today
@@ -1077,9 +1106,9 @@ $(document).on("click", "#addWorkoutBtn", function () {
     var options = (Object.keys(_exercises).length == 0 ? "" : (function () {
         var o = "";
         for (let property of _exercises) {
-            o += `<div class='workoutEntry' data-values='` + JSON.stringify(property) + `'>
-                <div><p>` + property.name + `
-                </p></div><p class='deleteWorkout' data-exercise-id='`+ property.exerciseID + `'><span class='glyphicon glyphicon-trash'></span></p>
+            o += `<div class='workoutEntry' data-values='` + JSON.stringify(property.obj) + `'>
+                <div><p>` + property.obj.name + `
+                </p></div><p class='deleteWorkout' data-exercise-id='`+ property.obj.exerciseID + `'><span class='glyphicon glyphicon-trash'></span></p>
                 </div>`;
         }
         return o;
@@ -1107,6 +1136,7 @@ $(document).on("click", ".workoutEntry > div", function () {
         }
         if (!exerciseExistsAlready) {
             _historyWorkouts[todayDate].push(exercise);
+            saveHistoryWorkouts();
             loadWorkoutsForToday();
             closeAlert();
         }
@@ -1117,6 +1147,7 @@ $(document).on("click", ".workoutEntry > div", function () {
         }
     } else {
         _historyWorkouts[todayDate] = [exercise];
+        saveHistoryWorkouts();
         loadWorkoutsForToday();
         closeAlert();
     }
@@ -1142,24 +1173,50 @@ $(document).on("click", "#yesAddExerciseAgain", function () {
     var todayDate = window.returnKeyFromDate(new Date());
     _historyWorkouts[todayDate].push(exercise);
     $("#deleteFromWorkoutsConfirm").addClass("hidden");
+    saveHistoryWorkouts();
     loadWorkoutsForToday();
     closeAlert();
 });
 
 $(document).on("click", "#removeFromWorkouts", function () {
-    printSingleExerciseArray();
     var exerciseIDToDelete = $(this).data("exerciseId");
-    if (!_historyWorkouts.hasOwnProperty(Symbol.iterator)) 
-        addIteratorToObject(_historyWorkouts);
+    if (Object.keys(_historyWorkouts).length > 0) {
+        console.log(_historyWorkouts);
+        if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
+            addIteratorToObject(_historyWorkouts);
 
-    for (let singleExerciseArray of _historyWorkouts) {
-       
+        //from all the previous workouts ever, remove from each daily array of workouts the exercise that was deleted. Delete the entire workout of the day if no other exercises are on that day.
+        var notFound = true;
+        while (notFound) {
+            notFound = false;
+            for (let singleExerciseArray of _historyWorkouts) {
+                for (let singleExercise of singleExerciseArray.obj){
+                    if (singleExercise.exerciseID == exerciseIDToDelete) {
+                        singleExerciseArray.obj.splice(singleExerciseArray.obj.indexOf(singleExercise), 1);
+                        notFound = true;
+                    }
+                }
+                if (singleExerciseArray.obj.length == 0) 
+                    delete _historyWorkouts[singleExerciseArray.relativeKey];
+            }
+        }
+        saveHistoryWorkouts();
     }
-    printSingleExerciseArray();
-
     delete _exercises[exerciseIDToDelete];
-    console.log("_exercises after removing deleted item", _exercises);
+    $(".workoutEntry").each(function () {
+        if ($(this).data("values").exerciseID == exerciseIDToDelete)
+            $(this).remove();
+    });
+
+    if ($(".workoutEntry").length == 0) {
+        $("#exerciseNoMsg").removeClass("hidden");
+        $("#exerciseSelect").addClass("hidden");
+    }
+
     saveExercises();
+    loadWorkoutsForToday();
+    closeMiniAlert();
+
 });
 
 $(document).on("click", ".addSetBtn", function () {
@@ -1170,13 +1227,29 @@ $(document).on("click", ".addSetBtn", function () {
 
 function saveExercises() {
     //save exercises in order to localstorage here
+    localStorage.setItem("_exercises", JSON.stringify(_exercises));
 }
 
-function deleteFrom () {
-    if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
-        addIteratorToObject(_historyWorkouts);
+function saveHistoryWorkouts() {
+    localStorage.setItem("_historyWorkouts", JSON.stringify(_historyWorkouts));
+}
 
-    for (let singleExerciseArray of _historyWorkouts) {
-        console.log(singleExerciseArray);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function setDefaultExercises() {
+    _exercises = {
+        0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
     }
 }
