@@ -128,8 +128,15 @@ function loadContent(what) {//initializes one part of the app vs the other
                 }
 
                 loadWorkoutsForToday();
-                //Add iterator to _exercises object to have direct access to its property values
-                addIteratorToObject(_exercises);
+                //Add iterator to objects to have direct access to its property values
+                if (!_exercises.hasOwnProperty(Symbol.iterator))
+                    addIteratorToObject(_exercises);
+
+                if (!_exerciseCategories.hasOwnProperty(Symbol.iterator))
+                    addIteratorToObject(_exerciseCategories);
+
+                if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
+                    addIteratorToObject(_historyWorkouts);
             }
         });
     } else {
@@ -1116,11 +1123,21 @@ function addNewExercise() {
     //show msgbox for new workout
     var options = (Object.keys(_exercises).length == 0 ? "" : (function () {
         var o = "";
-        for (let property of _exercises) {
-            o += `<div class='workoutEntry' data-values='` + JSON.stringify(property.obj) + `'>
-                <div><p>` + property.obj.name + `
-                </p></div><p class='deleteWorkout' data-exercise-id='`+ property.obj.exerciseID + `'><span class='glyphicon glyphicon-trash'></span></p>
-                </div>`;
+        for (let category of _exerciseCategories) {
+            let tmpHtml = `<div data-category-name='` + category.obj.title + `'>`;
+            let foundExerciseForCategory = false;
+            for (let property of _exercises) {
+                if (property.obj.categoryID == category.relativeKey) {
+                    tmpHtml += `<div class='workoutEntry' data-values='` + JSON.stringify(property.obj) + `'>
+                    <div><p>` + property.obj.name + `
+                    </p></div><p class='deleteWorkout' data-exercise-id='`+ property.obj.exerciseID + `'><span class='glyphicon glyphicon-trash'></span></p>
+                    </div>`;
+                    foundExerciseForCategory = true;
+                }
+            }
+
+            if (foundExerciseForCategory)
+                o += tmpHtml + `</div>`;
         }
         return o;
     }));
@@ -1140,8 +1157,8 @@ $(document).on("click", ".workoutEntry > div", function () {
     var todayDate = window.returnKeyFromDate(new Date());
     if (_historyWorkouts.hasOwnProperty(todayDate)) {
         let exerciseExistsAlready = false;
-        for (let singleExercise in _historyWorkouts[todayDate]){
-            if (singleExercise.name == exercise.name) {
+        for (let singleExercise of _historyWorkouts[todayDate]) {
+            if (singleExercise.exerciseID == exercise.exerciseID) {
                 exerciseExistsAlready = true;
                 break;
             }
@@ -1153,6 +1170,8 @@ $(document).on("click", ".workoutEntry > div", function () {
             closeAlert();
         }
         else {
+
+
             $("#addExistingExercise #titleForDelete span").append(_exercises[exercise.exerciseID].name);
             $("#addExistingExercise #yesAddExerciseAgain").data("exerciseId", exercise.exerciseID);
             $("#addExistingExercise").removeClass("hidden");
@@ -1167,6 +1186,11 @@ $(document).on("click", ".workoutEntry > div", function () {
 
 $(document).on("click", ".deleteWorkout", function () {
     var exerciseID = $(this).data("exerciseId");
+
+    //continue here
+    //alertMsgToAppend("miniAlert", true, ["TOPIDHERE"], ["deleteFromWorkoutsConfirm", ""]);
+
+
     $("#deleteFromWorkoutsConfirm #removeFromWorkouts").data("exerciseId", exerciseID);
     $("#deleteFromWorkoutsConfirm #titleForDelete span").empty().append(_exercises[exerciseID].name);
     $("#deleteFromWorkoutsConfirm").removeClass("hidden");
@@ -1193,10 +1217,6 @@ $(document).on("click", "#yesAddExerciseAgain", function () {
 $(document).on("click", "#removeFromWorkouts", function () {
     var exerciseIDToDelete = $(this).data("exerciseId");
     if (Object.keys(_historyWorkouts).length > 0) {
-        console.log(_historyWorkouts);
-        if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
-            addIteratorToObject(_historyWorkouts);
-
         //from all the previous workouts ever, remove from each daily array of workouts the exercise that was deleted. Delete the entire workout of the day if no other exercises are on that day.
         var notFound = true;
         while (notFound) {
@@ -1230,14 +1250,14 @@ $(document).on("click", "#removeFromWorkouts", function () {
     closeMiniAlert();
 });
 
-$(document).on("click", ".addSetBtn", function () {
-    var exerciseID = $(this).data("id");
-    alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
-});
-
 function saveExercises() {
-    //save exercises in order to localstorage here
+    //save exercises to localstorage here
     localStorage.setItem("_exercises", JSON.stringify(_exercises));
+}
+
+function saveCategories() {
+    //save exercise categories to localstorage here
+    localStorage.setItem("_exerciseCategories", JSON.stringify(_exerciseCategories));
 }
 
 function saveHistoryWorkouts() {
@@ -1246,24 +1266,54 @@ function saveHistoryWorkouts() {
 
 //On close of alert with name of key, open alert in value
 var previousAlertToShow = {
-    "createExercise": addNewExercise
+    createExercise: addNewExercise,
+    newCategory: createNewExercise
 };
 
+$(document).on("click", "#saveNewExercise", function () {
+    var exerciseName = $("#exerciseName").val().trim();
+    if (exerciseName.length > 0) {
+        $(".errorMsg").slideUp();
+        var newId = exerciseName.length;
+        while (true) {
+            newId++;
+            if (!_exercises.hasOwnProperty(newId))
+                break;
+        }
+        var notes = $("#description").val().trim();
+        var categoryId = $("input[name='category'][type='radio']:checked").val()
+        _exercises[newId] = new exercise(newId, exerciseName, notes, categoryId);
+        saveExercises();
+        previousAlertToShow.createExercise();
+    } else {
+        $(".errorMsg").slideDown(300);
+    }
+});
+
+$(document).on("click", "#cancelNewExercise", function () {
+    previousAlertToShow.createExercise();
+});
+
+$(document).on("click", "#cancelNewCategory", function () {
+    previousAlertToShow.newCategory();
+});
+
 $(document).on("click", "#createNewExercise", function () {
+    createNewExercise();
+})
+
+function createNewExercise() {
     var categoryRows = "";
     if (Object.keys(_exerciseCategories).length > 0) {
-        if (!_exerciseCategories.hasOwnProperty(Symbol.iterator))//add iterator to object if it does not have one already
-            addIteratorToObject(_exerciseCategories);
-
         var isFirstRow = true;
         for (let exerciseCategory of _exerciseCategories) {
-            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory.obj) + `'>
+            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `'>
                         <td>
                             <div class='position-relative'>
-                                <input type="radio" name="category" ` + (isFirstRow ? "checked" : "") +`>
+                                <input value='` + exerciseCategory.relativeKey + `' type="radio" name="category" ` + (isFirstRow ? "checked" : "") + `>
                                 <h3>` + exerciseCategory.obj.title + `</h3>
                             </div>
-                            <p>`+ exerciseCategory.obj.description +`</p>
+                            <p>`+ exerciseCategory.obj.description + `</p>
                         </td>
                     </tr>`;
             isFirstRow = false;
@@ -1274,11 +1324,34 @@ $(document).on("click", "#createNewExercise", function () {
                     </tr>`;
     }
     alertMsgToAppend("createExercise", true, ["<!--CATEGORYOPTIONS-->"], [categoryRows]);
-})
+}
+
+$(document).on("click", "#addNewCategory", function () {
+    alertMsgToAppend("createCategory", true);
+});
+
+$(document).on("click", "#saveNewCategory", function () {
+    var categoryTitle = $("#categoryName").val().trim();
+    if (categoryTitle.length > 0) {
+        $(".errorMsg").slideUp();
+        var newId = categoryTitle.length;
+        while (true) {
+            newId++;
+            if (!_exerciseCategories.hasOwnProperty(newId))
+                break;
+        }
+        var notes = $("#description").val().trim();
+        _exerciseCategories[newId] = { title: categoryTitle, description: (notes.length == 0 ? "-" : notes) };
+        saveCategories();
+        previousAlertToShow.newCategory();
+    } else {
+        $(".errorMsg").slideDown(300);
+    }
+});
 
 function setDefaultExercises() {
     _exercises = {
-        0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 1)
+        0: new exercise(0, "Flat Dumbell Bench Press", "Lying on bench, use barbell to press and workout your chest.", 3)
     }
 }
 function setDefaultCategories() {
@@ -1323,3 +1396,8 @@ function editOptionCategory(categoryObj) {
     
 }
 
+
+$(document).on("click", ".addSetBtn", function () {
+    var exerciseID = $(this).data("id");
+    alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
+});

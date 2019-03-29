@@ -919,6 +919,8 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     content: '(hold to edit)';
     display: block;
     text-align: center;
+    margin-top: 10px;
+    opacity: 0.5;
 }
 
 #favoriteSelect > p, #exerciseSelect > p {
@@ -926,29 +928,29 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     margin: 0;
 }
 
-#favoriteSelect > div.favoriteEntry p, #exerciseSelect > div.workoutEntry p {
+#favoriteSelect > div.favoriteEntry p, #exerciseSelect > div > div.workoutEntry p {
     padding: 5px 10px;
     margin: 0px;
     line-height: 20px;
 }
 
-#favoriteSelect > div.favoriteEntry:hover p, #exerciseSelect > div.workoutEntry:hover p {
+#favoriteSelect > div.favoriteEntry:hover p, #exerciseSelect > div > div.workoutEntry:hover p {
     background-color: #e2e2e2;
 }
 
-#favoriteSelect > div.favoriteEntry > div, #exerciseSelect > div.workoutEntry > div {
+#favoriteSelect > div.favoriteEntry > div, #exerciseSelect > div > div.workoutEntry > div {
     width: 80%;
     display: inline-block;
     vertical-align: top;
 }
 
-#favoriteSelect > div.favoriteEntry > div > p:not(.deleteFavorite), #exerciseSelect > div.workoutEntry > div > p:not(.deleteWorkout) {
+#favoriteSelect > div.favoriteEntry > div > p:not(.deleteFavorite), #exerciseSelect > div > div.workoutEntry > div > p:not(.deleteWorkout) {
     font-size: 22px;
     overflow-y: hidden;
     overflow-x: auto;
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite, #exerciseSelect > div.workoutEntry > p.deleteWorkout {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite, #exerciseSelect > div > div.workoutEntry > p.deleteWorkout {
     font-size: 18px;
     width: 20%;
     display: inline-block;
@@ -956,18 +958,47 @@ input#favoriteName:focus::placeholder, .alertServings #servingSize:focus::placeh
     text-align: right;
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout > span {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div > div.workoutEntry > p.deleteWorkout > span {
     opacity: 0.7;
     transition: all 100ms;
     transform-origin: center;
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite:hover > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout:hover > span {
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite:hover > span, #exerciseSelect > div > div.workoutEntry > p.deleteWorkout:hover > span {
     opacity: 1;
     transform: rotate(9deg);
 }
 
-#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div.workoutEntry > p.deleteWorkout > span {
+#exerciseSelect > div {
+    position: relative;
+    margin: 25px 0px;
+    display: inline-block;
+    width: 100%;
+    transition: all 400ms;
+}
+
+#exerciseSelect > div:empty {
+   display:none;
+}
+
+#exerciseSelect > div:first-of-type {
+    margin-top: 30px;
+}
+#exerciseSelect > div:last-of-type {
+    margin-bottom: 00px;
+}
+
+#exerciseSelect > div::before {
+    content: attr(data-category-name);
+    display: block;
+    position: absolute;
+    top: -35px;
+    left: 10px;
+    font-size: 18px;
+    border-bottom: 1px dashed #a59fa1;
+}
+
+#favoriteSelect > div.favoriteEntry > p.deleteFavorite > span, #exerciseSelect > div > div.workoutEntry > p.deleteWorkout > span {
     vertical-align: middle;
     right: 2px;
 }
