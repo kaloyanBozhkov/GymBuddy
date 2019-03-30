@@ -1,4 +1,3 @@
-
 'use strict'
 $(document).ready(function () {
     var time = window.getCurrentTime();
@@ -377,17 +376,6 @@ function closeAlert() {
     });
 }
 
-function closeMiniAlert() {
-    var miniAlert = $("#alertBg .position-fixed:not(.hidden)");
-    miniAlert.animate({
-        "opacity": "0"
-    }, 100, function () {
-        setTimeout(function () {
-            miniAlert.addClass("hidden");
-        }, 150);
-    });
-}
-
 $(document).on("input", "#fatsCount, #proteinsCount, #carbsCount", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
     if ($(this).val() > 500)
@@ -746,6 +734,9 @@ $(document).on("click", "#saveItemToFavorites", function () {
 });
 
 $(document).on("click", "#loadServing", function () {
+    loadServing();
+});
+function loadServing() {
     var options = (_favoriteItems.length == 0 ? "" : (function () {
         var o = "";
         for (let j in _favoriteItems) {
@@ -760,7 +751,6 @@ $(document).on("click", "#loadServing", function () {
                 <div><p>` + _favoriteItems[j].title.trim() + `
                 </p></div><p class='deleteFavorite' data-index='`+ j + `'><span class='glyphicon glyphicon-trash'></span></p>
                 </div>`;
-
         }
 
         return o;
@@ -774,9 +764,7 @@ $(document).on("click", "#loadServing", function () {
     }
 
     alertMsgToAppend("importFromFavorites", true, ["HIDDEN1", "HIDDEN2", "OPTIONS"], [hidden1, hidden2, options]);
-
-});
-
+}
 
 $(document).on("click", ".favoriteEntry > div", function () {
     var parent = $(this).parent();
@@ -828,22 +816,19 @@ function searchThroughList(optionElementClass, optionContainer, dis) {
 
 $(document).on("click", ".deleteFavorite", function () {
     var indexToRemove = $(this).data("index");
-    $("#titleForDelete > span").html(_favoriteItems[indexToRemove].title);
-    $("#removeFromFavorites").data("index", indexToRemove);
-    $("#deleteFromFavoritesConfirm").removeClass("hidden");
-
+    alertMsgToAppend("miniAlert", true, ["TOPIDHERE", "MESSAGEID", "MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"], ["deleteFromWorkoutsConfirm", "titleForDelete", "Delete <span>" + _favoriteItems[indexToRemove].title + "</span> from favorites?", "removeFromFavorites", "cancelRemoveFromFavorites", "Delete", "Cancel"], [{ attrName: "index", attrValue: indexToRemove }]);
 });
 
 $(document).on("click", "#cancelRemoveFromFavorites", function () {
-    $("#deleteFromFavoritesConfirm").addClass("hidden");
+    previousAlertToShow.deleteFavorite();
 });
 
 
 $(document).on("click", "#removeFromFavorites", function () {
-    var indexToRemove = $("#removeFromFavorites").data("index");
+    var indexToRemove = $("#alertBg").data("index");
     _favoriteItems.splice(indexToRemove, 1);
     localStorage.setItem("favorites", JSON.stringify(_favoriteItems));
-    closeAlert();
+    previousAlertToShow.deleteFavorite();
 });
 
 $(document).on("click", ".removeEntry", function () {
@@ -1170,11 +1155,7 @@ $(document).on("click", ".workoutEntry > div", function () {
             closeAlert();
         }
         else {
-
-
-            $("#addExistingExercise #titleForDelete span").append(_exercises[exercise.exerciseID].name);
-            $("#addExistingExercise #yesAddExerciseAgain").data("exerciseId", exercise.exerciseID);
-            $("#addExistingExercise").removeClass("hidden");
+            alertMsgToAppend("miniAlert", true, ["TOPIDHERE", "MESSAGEID", "MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"], ["addExistingExercise", "titleForDelete", "<span>" + _exercises[exercise.exerciseID].name + "</span> has already been added for today, add again?", "yesAddExerciseAgain", "noDoNotAddExerciseAgain", "Yes", "No"], [{ attrName: "exerciseId", attrValue: exercise.exerciseID }]);
         }
     } else {
         _historyWorkouts[todayDate] = [exercise];
@@ -1186,26 +1167,16 @@ $(document).on("click", ".workoutEntry > div", function () {
 
 $(document).on("click", ".deleteWorkout", function () {
     var exerciseID = $(this).data("exerciseId");
-
     //continue here
-    //alertMsgToAppend("miniAlert", true, ["TOPIDHERE"], ["deleteFromWorkoutsConfirm", ""]);
-
-
-    $("#deleteFromWorkoutsConfirm #removeFromWorkouts").data("exerciseId", exerciseID);
-    $("#deleteFromWorkoutsConfirm #titleForDelete span").empty().append(_exercises[exerciseID].name);
-    $("#deleteFromWorkoutsConfirm").removeClass("hidden");
+    alertMsgToAppend("miniAlert", true, ["TOPIDHERE", "MESSAGEID", "MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"], ["deleteFromWorkoutsConfirm", "titleForDelete", "Delete <span>" + _exercises[exerciseID].name + "</span> from exercises?", "removeFromWorkouts", "cancelRemoveFromWorkouts", "Delete", "Cancel"], [{ attrName: "exerciseId", attrValue: exerciseID }]);
 });
 
-$(document).on("click", "#cancelRemoveFromWorkouts", function () {
-    $("#deleteFromWorkoutsConfirm").addClass("hidden");
-});
-
-$(document).on("click", "#noDoNotAddExerciseAgain", function () {
-    $("#addExistingExercise").addClass("hidden");
+$(document).on("click", "#cancelRemoveFromWorkouts, #noDoNotAddExerciseAgain, #cancelExerciseChanges", function () {
+    previousAlertToShow.createExercise();
 });
 
 $(document).on("click", "#yesAddExerciseAgain", function () {
-    var exercise = new singleExercise($(this).data("exerciseId"));
+    var exercise = new singleExercise($("#alertBg").data("exerciseId"));
     var todayDate = window.returnKeyFromDate(new Date());
     _historyWorkouts[todayDate].push(exercise);
     $("#deleteFromWorkoutsConfirm").addClass("hidden");
@@ -1215,7 +1186,7 @@ $(document).on("click", "#yesAddExerciseAgain", function () {
 });
 
 $(document).on("click", "#removeFromWorkouts", function () {
-    var exerciseIDToDelete = $(this).data("exerciseId");
+    var exerciseIDToDelete = $("#alertBg").data("exerciseId");
     if (Object.keys(_historyWorkouts).length > 0) {
         //from all the previous workouts ever, remove from each daily array of workouts the exercise that was deleted. Delete the entire workout of the day if no other exercises are on that day.
         var notFound = true;
@@ -1247,7 +1218,7 @@ $(document).on("click", "#removeFromWorkouts", function () {
 
     saveExercises();
     loadWorkoutsForToday();
-    closeMiniAlert();
+    previousAlertToShow.createExercise();
 });
 
 function saveExercises() {
@@ -1267,7 +1238,8 @@ function saveHistoryWorkouts() {
 //On close of alert with name of key, open alert in value
 var previousAlertToShow = {
     createExercise: addNewExercise,
-    newCategory: createNewExercise
+    newCategory: createNewExercise,
+    deleteFavorite: loadServing
 };
 
 $(document).on("click", "#saveNewExercise", function () {
@@ -1294,7 +1266,7 @@ $(document).on("click", "#cancelNewExercise", function () {
     previousAlertToShow.createExercise();
 });
 
-$(document).on("click", "#cancelNewCategory", function () {
+$(document).on("click", "#cancelNewCategory, #cancelCategoryChanges", function () {
     previousAlertToShow.newCategory();
 });
 
@@ -1302,7 +1274,7 @@ $(document).on("click", "#createNewExercise", function () {
     createNewExercise();
 })
 
-function createNewExercise() {
+function createCategoryRows(checkSpecificCategory = false, categoryIdToCheck = 0) {
     var categoryRows = "";
     if (Object.keys(_exerciseCategories).length > 0) {
         var isFirstRow = true;
@@ -1310,7 +1282,7 @@ function createNewExercise() {
             categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `'>
                         <td>
                             <div class='position-relative'>
-                                <input value='` + exerciseCategory.relativeKey + `' type="radio" name="category" ` + (isFirstRow ? "checked" : "") + `>
+                                <input value='` + exerciseCategory.relativeKey + `' type="radio" name="category" ` + (checkSpecificCategory ? (exerciseCategory.relativeKey == categoryIdToCheck ? "checked" : "") : (isFirstRow ? "checked" : "")) + `>
                                 <h3>` + exerciseCategory.obj.title + `</h3>
                             </div>
                             <p>`+ exerciseCategory.obj.description + `</p>
@@ -1323,15 +1295,19 @@ function createNewExercise() {
                 <td class='optionCategory'><h3>No categories created yet.</h3></td>
                     </tr>`;
     }
-    alertMsgToAppend("createExercise", true, ["<!--CATEGORYOPTIONS-->"], [categoryRows]);
+    return categoryRows;
+}
+
+function createNewExercise() {
+    alertMsgToAppend("createExercise", true, ["<!--CATEGORYOPTIONS-->"], [createCategoryRows()]);
 }
 
 $(document).on("click", "#addNewCategory", function () {
-    alertMsgToAppend("createCategory", true);
+    alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TITLEHERE", "PLACEHOLDERTITLE", "VALUETITLE", "SECONDHERE", "PLACEHOLDERNOTES", "VALUENOTES", "ERRORMSG", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN", "CLASS1", "CLASS2"], ["New Category", "Title", "Category Name", "", "Notes", "Optional", "", "The category must have a title before continuing.", "saveNewCategory", "Save Category", "cancelNewCategory", "Cancel", "", ""]);
 });
 
 $(document).on("click", "#saveNewCategory", function () {
-    var categoryTitle = $("#categoryName").val().trim();
+    var categoryTitle = $("#inputFirst").val().trim();
     if (categoryTitle.length > 0) {
         $(".errorMsg").slideUp();
         var newId = categoryTitle.length;
@@ -1340,7 +1316,7 @@ $(document).on("click", "#saveNewCategory", function () {
             if (!_exerciseCategories.hasOwnProperty(newId))
                 break;
         }
-        var notes = $("#description").val().trim();
+        var notes = $("#inputSecond").val().trim();
         _exerciseCategories[newId] = { title: categoryTitle, description: (notes.length == 0 ? "-" : notes) };
         saveCategories();
         previousAlertToShow.newCategory();
@@ -1387,15 +1363,86 @@ $(document).on("mousedown touchstart", ".optionCategory", function () {
     }, 1000);
 });
 
-$(document).on("mouseup touchend", ".optionCategory", function () {
+$(document).on("mousedown touchstart", ".workoutEntry", function () {
+    var exerciseObj = $(this).data("values");
+    holdTimer = window.setTimeout(function () {
+        editWorkoutEntry(exerciseObj);
+    }, 1000);
+});
+
+$(document).on("mouseup touchend", ".optionCategory, .workoutEntry", function () {
     if (holdTimer)
         window.clearTimeout(holdTimer);
 });
 
 function editOptionCategory(categoryObj) {
-    
+    var hasValue = "";
+    if (categoryObj.obj.description.trim().length > 1)
+        var hasValue = "hasValue";
+
+    var deleteBtn = `<span id='deleteCategoryBtn' class='glyphicon glyphicon-trash' data-category='` + JSON.stringify(categoryObj) + `'></span>`;
+
+    alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TITLEHERE", "PLACEHOLDERTITLE", "VALUETITLE", "SECONDHERE", "PLACEHOLDERNOTES", "VALUENOTES", "ERRORMSG", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN", "CLASS1", "CLASS2", "<!--ADDITIONAL HTML-->"], ["Edit Category", "Title", "Category Name", categoryObj.obj.title, "Notes", "Optional", categoryObj.obj.description, "The category must have a valid title.", "saveCategoryChanges", "Save", "cancelCategoryChanges", "Cancel", "hasValue", hasValue, deleteBtn], [{ attrName: "categoryObj", attrValue: categoryObj }]);
 }
 
+$(document).on("click", "#deleteCategoryBtn", function () {
+    var categoryObj = $(this).data("category");
+    alertMsgToAppend("miniAlert", true, ["TOPIDHERE", "MESSAGEID", "MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"], ["deleteFromWorkoutsConfirm", "titleForDelete", "Delete <span>" + categoryObj.obj.title + "</span> from exercise categories?", "yesDeleteCategory", "cancelDeleteCategory", "Delete", "Cancel"], [{ attrName: "categoryKey", attrValue: categoryObj.relativeKey }]);
+});
+
+$(document).on("click", "#yesDeleteCategory", function () {
+    var key = $("#alertBg").data("categoryKey");
+    delete _exerciseCategories[key];
+    saveCategories();
+    previousAlertToShow.newCategory();
+});
+
+function editWorkoutEntry(exerciseObj) {
+    var hasValue = "";
+    if (exerciseObj.comment.trim().length > 1)
+        var hasValue = "hasValue";
+
+    var categoryOptions = `<h3>Category:</h3>
+    <div class="categoryTable">
+        <table class="width-full">
+            <tbody>
+                `+ createCategoryRows(true, exerciseObj.categoryID) +`
+            </tbody>
+        </table>
+    </div>`;
+
+    alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TITLEHERE", "PLACEHOLDERTITLE", "VALUETITLE", "SECONDHERE", "PLACEHOLDERNOTES", "VALUENOTES", "ERRORMSG", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN", "CLASS1", "CLASS2", "<!--ADDITIONAL HTML-->"], ["Edit Exercise", "Title", "Exercise Name", exerciseObj.name, "Notes", "Optional", exerciseObj.comment, "The exercise must have a valid title.", "saveExerciseChanges", "Save", "cancelExerciseChanges", "Cancel", "hasValue", hasValue, categoryOptions], [{ attrName: "exerciseObj", attrValue: exerciseObj }]);
+}
+
+$(document).on("click", "#saveCategoryChanges", function () {
+    var title = $("#inputFirst").val().trim();
+    var notes = $("#inputSecond").val().trim();
+    var categoryObj = $("#alertBg").data("categoryObj");
+    if (title.length == 0) {
+        $(".errorMsg").slideDown(300);
+    } else {
+        $(".errMsg").slideUp();
+        _exerciseCategories[categoryObj.relativeKey] = { title: title, description: notes };
+        saveCategories();
+        previousAlertToShow.newCategory();
+    }
+});
+
+$(document).on("click", "#saveExerciseChanges", function () {
+    var title = $("#inputFirst").val().trim();
+    var notes = $("#inputSecond").val().trim();
+    var exerciseObj = $("#alertBg").data("exerciseObj");
+    if (title.length == 0) {
+        $(".errorMsg").slideDown(300);
+    } else {
+        $(".errMsg").slideUp();
+        _exercises[exerciseObj.exerciseID].comment = notes;
+        _exercises[exerciseObj.exerciseID].name = title;
+        _exercises[exerciseObj.exerciseID].categoryID = $("input[type='radio'][name='category']:checked").val();
+        saveExercises();
+        previousAlertToShow.createExercise();
+    }
+});
 
 $(document).on("click", ".addSetBtn", function () {
     var exerciseID = $(this).data("id");
