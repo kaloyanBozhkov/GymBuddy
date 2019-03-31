@@ -87,6 +87,11 @@ var _exercises = {//key is id, value is exercise obj. These are the saved exerci
 var _dailyExercises = {}; //these are the exercises for each day
 var _exerciseCategories = {}; //category ID, { title, description }
 
+function category(name, notes) {
+    this.title = name;
+    this.description = notes;
+}
+
 function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 0, bestTime = 0) { //saved exercise
     this.name = name;
     this.exerciseID = ID;

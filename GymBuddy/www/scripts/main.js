@@ -726,11 +726,46 @@ $(document).on("click", "#saveItemToFavorites", function () {
     $(".errorMsg").slideUp();
     if ($("#fatsCount").val().trim().length > 0 && $("#carbsCount").val().trim().length > 0 && $("#proteinsCount").val().trim().length > 0 && $("#gramsCount").val().trim().length > 0 && $("#itemName").val().trim().length > 0) {
         _favoriteItems.push(new favoriteItem($("#itemName").val().trim(), $("#gramsCount").val().trim(), $("#proteinsCount").val().trim(), $("#fatsCount").val().trim(), $("#carbsCount").val().trim()));
-        localStorage.setItem("favorites", JSON.stringify(_favoriteItems));
+        saveFavorites();
         closeAlert();
     } else {
         $(".errorMsg").slideDown(300);
     }
+});
+
+$(document).on("mousedown touchstart", ".favoriteEntry", function () {
+    var favoriteFoodObj = $(this).data("values");
+    holdTimer = window.setTimeout(function () {
+        editFavoriteFood(favoriteFoodObj);
+    }, 1000);
+});
+
+function editFavoriteFood(favoriteFoodObj) {
+    var favoriteDiv = "<div>" + _msgBox["addFavorites"].replace("VALUETITLE", favoriteFoodObj.title).replace("VALUEGRAMS", favoriteFoodObj.grams).replace("VALUEFATS", favoriteFoodObj.fats).replace("VALUECARBS", favoriteFoodObj.carbs).replace("VALUEPROTEINS", favoriteFoodObj.proteins) + "<div>";
+    favoriteDiv = $.parseHTML(favoriteDiv);
+    favoriteDiv = $(favoriteDiv).find("div.width-full.inputStyling.tableStyling").html();
+    alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TITLEHERE", "PLACEHOLDERTITLE", "VALUETITLE", "SECONDHERE", "PLACEHOLDERNOTES", "VALUENOTES", "ERRORMSG", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN", "CLASS1", "CLASS2", "<!--ADDITIONAL HTML-->", "TABLEMULTIPURPOSE"], ["Edit Favorite Food", "", "", "", "", "", "", "You must fill in all the fields before proceeding.", "saveFavoriteFoodChanges", "Save", "cancelFavoriteFoodChanges", "Cancel", "", "", favoriteDiv, "hidden"], [{ attrName: "favoriteFoodObj", attrValue: favoriteFoodObj }]);
+}
+
+$(document).on("click", "#saveFavoriteFoodChanges", function () {
+    var title = $("#itemName").val().trim();
+    var grams = $("#gramsCount").val().trim();
+    var fats = $("#fatsCount").val().trim();
+    var proteins = $("#proteinsCount").val().trim();
+    var carbs = $("#carbsCount").val().trim();
+    var favoriteFoodObj = $("#alertBg").data("favoriteFoodObj");
+    if (title.length > 0 && grams.length > 0 && fats.length > 0 && proteins.length > 0 && carbs.length > 0) {
+        $(".errMsg").slideUp();
+        _favoriteItems[favoriteFoodObj.key] = new favoriteItem(title, grams, proteins, fats, carbs);
+        saveFavorites();
+        previousAlertToShow.deleteFavorite();
+    } else {
+        $(".errorMsg").slideDown(300);
+    }
+});
+
+$(document).on("click", "#cancelFavoriteFoodChanges", function () {
+    previousAlertToShow.deleteFavorite();
 });
 
 $(document).on("click", "#loadServing", function () {
@@ -745,7 +780,8 @@ function loadServing() {
                 carbs: _favoriteItems[j].carbs,
                 fats: _favoriteItems[j].fats,
                 proteins: _favoriteItems[j].proteins,
-                grams: _favoriteItems[j].grams
+                grams: _favoriteItems[j].grams,
+                key: j
             };
             o += `<div class='favoriteEntry' data-values='` + JSON.stringify(tmpObj) + `'>
                 <div><p>` + _favoriteItems[j].title.trim() + `
@@ -779,6 +815,7 @@ $(document).on("click", ".favoriteEntry > div", function () {
 $(document).on("input", "#favoriteName, #exerciseList", function () {
     let optionElementClass = "";
     let optionContainer = "";
+    let runSecondPart = false;
     switch ($(this).attr("id")) {
         case "favoriteName":
             optionElementClass = ".favoriteEntry";
@@ -787,12 +824,13 @@ $(document).on("input", "#favoriteName, #exerciseList", function () {
         case "exerciseList":
             optionElementClass = ".workoutEntry";
             optionContainer = "#exerciseSelect";
+            runSecondPart = true;
             break;
     }
-    searchThroughList(optionElementClass, optionContainer, $(this));
+    searchThroughList(optionElementClass, optionContainer, $(this), runSecondPart);
 });
 
-function searchThroughList(optionElementClass, optionContainer, dis) {
+function searchThroughList(optionElementClass, optionContainer, dis, runSecondPart) {
     dis.val(camelCaseInput(dis.val()));
     if (dis.val().trim().length == 0) {
         $(optionElementClass + ".hidden").removeClass("hidden");
@@ -809,9 +847,24 @@ function searchThroughList(optionElementClass, optionContainer, dis) {
     }
     if ($(optionElementClass + ":not(.hidden)").length == 0) {
         $(optionContainer + " > p").removeClass("hidden");
+        $(optionContainer).addClass("noEditNote");
     } else {
         $(optionContainer + " > p").addClass("hidden");
+        $(optionContainer).removeClass("noEditNote");
     }
+
+    //hides category headers altogether if nothing under them, and fixes margin on last category
+    if (runSecondPart) {
+        $(optionContainer + " > div").each(function () {
+            if ($(this).children("div.hidden").length == $(this).children("div").length) {
+                $(this).addClass("hidden");
+            } else {
+                $(this).removeClass("hidden");
+            }
+        });
+        $(optionContainer + " > .last").removeClass("last");
+        $(optionContainer + " > div:not(.hidden)").last().addClass("last");
+    }    
 }
 
 $(document).on("click", ".deleteFavorite", function () {
@@ -827,9 +880,13 @@ $(document).on("click", "#cancelRemoveFromFavorites", function () {
 $(document).on("click", "#removeFromFavorites", function () {
     var indexToRemove = $("#alertBg").data("index");
     _favoriteItems.splice(indexToRemove, 1);
-    localStorage.setItem("favorites", JSON.stringify(_favoriteItems));
+    saveFavorites();
     previousAlertToShow.deleteFavorite();
 });
+
+function saveFavorites() {
+    localStorage.setItem("favorites", JSON.stringify(_favoriteItems));
+}
 
 $(document).on("click", ".removeEntry", function () {
     var itemId = $(this).data("itemId");
@@ -1317,7 +1374,7 @@ $(document).on("click", "#saveNewCategory", function () {
                 break;
         }
         var notes = $("#inputSecond").val().trim();
-        _exerciseCategories[newId] = { title: categoryTitle, description: (notes.length == 0 ? "-" : notes) };
+        _exerciseCategories[newId] = new category(categoryTitle, (notes.length == 0 ? "-" : notes));
         saveCategories();
         previousAlertToShow.newCategory();
     } else {
@@ -1370,7 +1427,7 @@ $(document).on("mousedown touchstart", ".workoutEntry", function () {
     }, 1000);
 });
 
-$(document).on("mouseup touchend", ".optionCategory, .workoutEntry", function () {
+$(document).on("mouseup touchend", ".optionCategory, .workoutEntry, .favoriteEntry", function () {
     if (holdTimer)
         window.clearTimeout(holdTimer);
 });
@@ -1406,13 +1463,14 @@ function editWorkoutEntry(exerciseObj) {
     <div class="categoryTable">
         <table class="width-full">
             <tbody>
-                `+ createCategoryRows(true, exerciseObj.categoryID) +`
+                `+ createCategoryRows(true, exerciseObj.categoryID) + `
             </tbody>
         </table>
     </div>`;
 
     alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TITLEHERE", "PLACEHOLDERTITLE", "VALUETITLE", "SECONDHERE", "PLACEHOLDERNOTES", "VALUENOTES", "ERRORMSG", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN", "CLASS1", "CLASS2", "<!--ADDITIONAL HTML-->"], ["Edit Exercise", "Title", "Exercise Name", exerciseObj.name, "Notes", "Optional", exerciseObj.comment, "The exercise must have a valid title.", "saveExerciseChanges", "Save", "cancelExerciseChanges", "Cancel", "hasValue", hasValue, categoryOptions], [{ attrName: "exerciseObj", attrValue: exerciseObj }]);
 }
+
 
 $(document).on("click", "#saveCategoryChanges", function () {
     var title = $("#inputFirst").val().trim();
@@ -1422,7 +1480,7 @@ $(document).on("click", "#saveCategoryChanges", function () {
         $(".errorMsg").slideDown(300);
     } else {
         $(".errMsg").slideUp();
-        _exerciseCategories[categoryObj.relativeKey] = { title: title, description: notes };
+        _exerciseCategories[categoryObj.relativeKey] = new category(title, notes);
         saveCategories();
         previousAlertToShow.newCategory();
     }
