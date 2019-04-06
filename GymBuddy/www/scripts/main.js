@@ -471,18 +471,31 @@ $(document).on("focusout", "#foodName", function () {
     $(this).attr("placeholder", "Type Food Name Here");
 });
 
-$(document).on("input", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
+$(document).on("input", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen, input#kgCount", function () {
     $(this).val($(this).val().replace(",", ".").trim().match(/^\d*\.?\d*$/));
     if ($(this).val().trim() == ".")
         $(this).val("0.");
 });
 
-$(document).on("focusin", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
+$(document).on("focusin", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen, input#repCount", function () {
     if ($(this).val().trim() == "0")
         $(this).val("");
 });
 
-$(document).on("focusout", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen", function () {
+$(document).on("focusin click", "input#kgCount", function () {
+    if ($(this).val().trim() == "0.0")
+        $(this).val("");
+});
+
+$(document).on("focusout", "input#kgCount", function () {
+    let val = round($(this).val().trim());
+    if (val % 2 == 0)
+        val = val.toFixed(1);
+
+    $(this).val(val);
+});
+
+$(document).on("focusout", "#singleFoodCarbs input, #singleFoodProteins input, #singleFoodFats input, #singleFoodServingSize input, input.carbsOrange, input.fatsRed, input.proteinsGreen, input#repCount", function () {
     if ($(this).val().trim().length <= 0)
         $(this).val("0");
 
@@ -518,38 +531,42 @@ $(document).on("click", "#setServingSize", function () { //AlertMsgToAppend butt
     var serving = $("#alertBg").data("servingSize");//grams
     var servingQuantity = $("#servingSize").val().trim();//servings
     var name = $("#foodName").val().trim().length > 0 ? $("#foodName").val().trim() : "Unnamed Entry";
-    _currentMacros.fats += round(parseFloat(fats) * servingQuantity);
-    _currentMacros.carbs += round(parseFloat(carbs) * servingQuantity);
-    _currentMacros.proteins += round(parseFloat(proteins) * servingQuantity);
-    var currentDate = getCurrentTime();
-    localStorage.setItem("currentMacros", JSON.stringify(_currentMacros));
+    if (servingQuantity.length > 0) {
+        _currentMacros.fats += round(parseFloat(fats) * servingQuantity);
+        _currentMacros.carbs += round(parseFloat(carbs) * servingQuantity);
+        _currentMacros.proteins += round(parseFloat(proteins) * servingQuantity);
+        var currentDate = getCurrentTime();
+        localStorage.setItem("currentMacros", JSON.stringify(_currentMacros));
 
-    var time = window.getCurrentTime();
-    var addedItem = new singleServing(time.minutes, time.hour, serving, fats, carbs, proteins, name, servingQuantity);
+        var time = window.getCurrentTime();
+        var addedItem = new singleServing(time.minutes, time.hour, serving, fats, carbs, proteins, name, servingQuantity);
 
-    _singleDayServing.servings.push(addedItem);
+        _singleDayServing.servings.push(addedItem);
 
-    if (!isEmpty(_singleDayServing)) {
-        _singleDayServing.totalMacrosId = _totalMacros.day + "/" + _totalMacros.month + "/" + _totalMacros.year;
-        _singleDayServing.fats = _currentMacros.fats;
-        _singleDayServing.carbs = _currentMacros.carbs;
-        _singleDayServing.proteins = _currentMacros.proteins;
+        if (!isEmpty(_singleDayServing)) {
+            _singleDayServing.totalMacrosId = _totalMacros.day + "/" + _totalMacros.month + "/" + _totalMacros.year;
+            _singleDayServing.fats = _currentMacros.fats;
+            _singleDayServing.carbs = _currentMacros.carbs;
+            _singleDayServing.proteins = _currentMacros.proteins;
 
-        localStorage.setItem("singleDayServing", JSON.stringify(_singleDayServing));
+            localStorage.setItem("singleDayServing", JSON.stringify(_singleDayServing));
+        }
+
+        _historyServings[time.day + "/" + time.month + "/" + time.year] = _singleDayServing;
+
+        if (!isEmpty(_historyServings))
+            localStorage.setItem("historyServings", JSON.stringify(_historyServings));
+
+        updateBarWidths();
+
+        $("#foodName").val("");
+        $("#foodTracker > div input").each(function () {
+            $(this).val("0");
+        });
+        closeAlert();
+    } else {
+        errorField($("#servingSize").siblings("p:first-of-type"));
     }
-
-    _historyServings[time.day + "/" + time.month + "/" + time.year] = _singleDayServing;
-
-    if (!isEmpty(_historyServings))
-        localStorage.setItem("historyServings", JSON.stringify(_historyServings));
-
-    updateBarWidths();
-
-    $("#foodName").val("");
-    $("#foodTracker > div input").each(function () {
-        $(this).val("0");
-    });
-    closeAlert();
 });
 
 
@@ -606,7 +623,6 @@ $(document).on("change", "#foodTracker > input", function () {
 });
 
 function getDisplayDate(date) {
-    console.log("GET DISPLAY DATE: ", date);
     return window.dayNames[date.getDay()] + ", " + window.monthNames[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
 }
 /*DELETE*/
@@ -650,8 +666,6 @@ $(document).on("mouseleave touchend", "#menu-left, #menu-right", function () {
 $(document).on("click", "#menuHistoryServings #menu-left", function () {
     var date = returnPastDate(1, $("#dayEntriesShownFor").data("date"));
     $("#dayEntriesShownFor").html(getDisplayDate(date)).data("date", date);
-    console.log(date);
-    console.log(getDisplayDate(date))
     if ($("#menu-right").hasClass("hidden")) {
         var currentDate = returnPastDate(1); //yesterday date not current
         if (new Date(date.getFullYear(), date.getMonth(), date.getDate()) < new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
@@ -890,11 +904,11 @@ function saveFavorites() {
 
 $(document).on("click", ".removeEntry", function () {
     var itemId = $(this).data("itemId");
-    alertMsgToAppend("deleteEntry", true, ["ITEMNAME", "ATTRID"], [_singleDayServing.servings[itemId].itemName, itemId]);
+    alertMsgToAppend("miniAlert", true, ["TOPIDHERE", "MESSAGEID", "MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"], ["deleteFoodEntry", "titleForDelete", "Remove <span>" + _singleDayServing.servings[itemId].itemName + "</span> from today's servings?", "removeEntryFromServings", "cancel", "Delete", "Cancel"], [{ attrName: "index", attrValue: itemId }]);
 });
 
 $(document).on("click", "#removeEntryFromServings", function () {
-    var indexToRemove = $(this).data("index");
+    var indexToRemove = $("#alertBg").data("index");
     var item = _singleDayServing.servings[indexToRemove];
     var carbs = round(parseFloat(item.carbs) * parseFloat(item.servingQuantity));
     var fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
@@ -1113,40 +1127,55 @@ function loadWorkoutsForToday() {
     if (_historyWorkouts.hasOwnProperty(todayDate)) {
         //check if for TODAY there is any workouts saved already, if soooo load them!
         var div = "";
+        let indexCounter = 0;
         for (var singleExercise of _historyWorkouts[todayDate]) {//assume array of singleExercises
-            let maxForExercise = window.getMax(singleExercise.exerciseID);
             let setsDiv = "";
-             div += `<div class="individualExercise box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10">
+            let totalVolumeDiv = "";
+            let totalVolume = 0;
+            div += `<div class="individualExercise box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10 noselect">
                 <div class="workoutHeader">
                     <h3 class="margin-0">`+ _exercises[singleExercise.exerciseID].name +`</h3>
                 </div>
-                <div class="workoutContent" data-empty="`+ (singleExercise.set.length == 0 ? "true" : "false") +`">
+                <div class="workoutContent" data-empty="`+ (singleExercise.set.length == 0 ? "true" : "false") + `" data-id='` + singleExercise.exerciseID +`' ">
                     <!-- start sets -->
-                    ` + (singleExercise.set.length == 0 ? "<p class='noSets'>No sets added yet</p>" : "SETS") + `
+                    ` + (singleExercise.set.length == 0 ? "" : "#SETS#") + `
                     <!-- last div of type set have border bottom and data-attribute for total weight -->
                     <div class="addSet">
-                        <div class="separator inline-block"></div>
-                        <div class="totalVolume">
-                            <p><span>TOTALVOLUME</span>kg</p>
-                        </div>
-                        <p data-date='`+todayDate+`' data-id='`+ singleExercise.exerciseID+`' class="addSetBtn buttonStyled coolBorder"><span class="glyphicon glyphicon-plus"></span></p>
+                        <span data-array-index='`+ indexCounter +`' data-id='` + singleExercise.exerciseID +`'  class="addSetBtn glyphicon glyphicon-plus"></span>
+                        `+ (singleExercise.set.length == 0  ? '<p class="noSets">No sets added yet.</p>' : "") +`                    
                     </div>
+                    ` + (singleExercise.set.length == 0 ? "" : "#TOTALVOLUME#") + `
+                    <div class="separator inline-block"></div>
+                    <p data-date='`+ todayDate + `' data-id='` + singleExercise.exerciseID +`' class='viewHistory'>View History</p>    
                 </div>
             </div>`;
-           
+
+             if (singleExercise.set.length > 0)
+                 setsDiv += "<table class='setsTable'><tbody>";
+
+             let setIndexCounter = 0;
              for (var set of singleExercise.set) {//array of sets
-                 setsDiv += `<div class="set" data-record="`+(set.weight > maxForExercise.maxWeight ? "visible" : "invisible")+`">
-                    <div class="recordSection">
-                        <span class="glyphicon glyphicon-flag"></span>
-                    </div><div class="measurementSection" data-note="`+ (set.note.length > 0 ? "true" : "false") + `">
-                              <p>
-                                  <span>`+ set.weight +`</span><span>kg</span>
-                                  <span>`+ set.reps +`</span><span>reps</span>
-                              </p>
-                    </div>
-                </div>`;
+                 setsDiv += `<tr class="set" data-set-details='` + JSON.stringify({ date: todayDate, exerciseIndex: indexCounter, setIndex: setIndexCounter }) + `' data-record="` + (checkForRecord(singleExercise.exerciseID, todayDate, indexCounter, setIndexCounter++) == true ? "visible" : "invisible") + `" data-has-note="` + (set.note.length > 0 ? "true" : "false") + `"` + (set.note.length > 0 ? ` data-note='` + set.note + `'` : "") +`>
+                    <td class="recordSection">
+                        <span class="glyphicon glyphicon-flag"></span><span class="glyphicon glyphicon-comment"></span>
+                    </td>
+                        <td><span>` + set.weight + `</span> <span>kg</span></td>
+                        
+                        <td><span>` + set.reps + `</span> <span>reps</span></td>
+                </tr>`;
+                 totalVolume += parseFloat(set.weight) * set.reps;
              }
-             div.replace("SETS", setsDiv);
+
+             if (singleExercise.set.length > 0)
+                 setsDiv += "</tbody></table>";
+
+             //sdasd
+             totalVolumeDiv = `<div class="totalVolume">
+                            <p><span>`+ round(totalVolume) +` kg</span></p>
+                        </div>`;
+
+             div = div.replace("#SETS#", setsDiv).replace("#TOTALVOLUME#", totalVolumeDiv);
+             indexCounter++;
         }
         $("#workoutsToday").append(div);
         $("#exercisesMsg").addClass("hidden");
@@ -1154,6 +1183,77 @@ function loadWorkoutsForToday() {
         //no workouts for today
         $("#exercisesMsg").removeClass("hidden");
     }
+}
+
+function checkForRecord(exerciseID, date, exerciseIndex, setId, deleteFound = false) {
+    if (_exercises[exerciseID].record != 0) {
+        let recordIndex = 0;
+        for (let record of _exercises[exerciseID].record) {//of used to access the array items dirrectly instead of getting the item index and then using that to get value from array, although ironically i am using a personal index counter to delete the array item lol
+            if (record.where.date == date &&
+                record.where.exerciseIndex == exerciseIndex &&
+                record.where.setId == setId) {
+                if (deleteFound) {
+                    _exercises[exerciseID].record.splice(recordIndex, 1);
+                    saveExercises();
+                }
+
+                return true;
+            }
+            recordIndex++;
+        }
+    }
+    return false;
+}
+
+$(document).on("click", "#addSetToExercise", function () {
+    var exerciseID = $("#alertBg").data("exerciseId");
+    var singleExerciseIndex = $("#alertBg").data("arrayIndex");
+    var todayDate = window.returnKeyFromDate(new Date());
+    var weight = $("#kgCount").val();
+    var reps = $("#repCount").val();
+    if (weight.length > 0 && parseFloat(weight) > 0 && reps.length > 0 && parseFloat(reps) > 0) {
+        $(".errorMsg").slideUp();
+        if (weight.indexOf(".") == -1)
+            weight = round(weight).toFixed(1);
+
+        window.addSet.apply(_historyWorkouts[todayDate][singleExerciseIndex], [weight, reps, $("#setAddSet textarea").val()]);
+        saveHistoryWorkouts();
+        setRecords(exerciseID, weight, reps, todayDate, singleExerciseIndex, (_historyWorkouts[todayDate][singleExerciseIndex].set.length - 1));
+        closeAlert();
+        loadWorkoutsForToday();
+    } else {
+        $(".errorMsg").slideDown(300);
+    }
+});
+
+function setRecords(exerciseID, weight, reps, todayDate, singleExerciseIndex, setId) {
+    //if no record for exercise, set one immediatelly
+    if (_exercises[exerciseID].record.length == 0) {
+        _exercises[exerciseID].record = [new record(weight, reps, todayDate, singleExerciseIndex, setId)];
+        saveExercises();
+        return true;
+    } else {
+        //array of records to check
+        let isRecord = true;
+        for (let i in _exercises[exerciseID].record) {
+            if (round(_exercises[exerciseID].record[i].weight) >= round(weight) && round(_exercises[exerciseID].record[i].reps) >= round(reps)) {
+                isRecord = false;
+                break;
+            }
+        }
+        if (isRecord) {
+            let indexToRemove = [];
+            for (let i = _exercises[exerciseID].record.length - 1; i >= 0; i--) {//add indexes back to forth so splice does not fuck up the order
+                if (round(_exercises[exerciseID].record[i].weight) <= round(weight) && round(_exercises[exerciseID].record[i].reps) <= round(reps))
+                    _exercises[exerciseID].record.splice(i, 1);;
+            }
+
+            _exercises[exerciseID].record.push(new record(weight, reps, todayDate, singleExerciseIndex, setId));
+            saveExercises();
+            return true;
+        }
+    }
+    return false;
 }
 
 $(document).on("click", "#addWorkoutBtn", function () {
@@ -1323,7 +1423,7 @@ $(document).on("click", "#cancelNewExercise", function () {
     previousAlertToShow.createExercise();
 });
 
-$(document).on("click", "#cancelNewCategory, #cancelCategoryChanges", function () {
+$(document).on("click", "#cancelNewCategory, #cancelCategoryChanges, #cancelDeleteCategory", function () {
     previousAlertToShow.newCategory();
 });
 
@@ -1331,12 +1431,12 @@ $(document).on("click", "#createNewExercise", function () {
     createNewExercise();
 })
 
-function createCategoryRows(checkSpecificCategory = false, categoryIdToCheck = 0) {
+function createCategoryRows(checkSpecificCategory = false, categoryIdToCheck = 0, enableEditing = true) {
     var categoryRows = "";
     if (Object.keys(_exerciseCategories).length > 0) {
         var isFirstRow = true;
         for (let exerciseCategory of _exerciseCategories) {
-            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `'>
+            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `' data-editing-enabled='` + JSON.stringify(enableEditing) +`'>
                         <td>
                             <div class='position-relative'>
                                 <input value='` + exerciseCategory.relativeKey + `' type="radio" name="category" ` + (checkSpecificCategory ? (exerciseCategory.relativeKey == categoryIdToCheck ? "checked" : "") : (isFirstRow ? "checked" : "")) + `>
@@ -1413,21 +1513,19 @@ $(document).on("click", ".optionCategory", function () {
 
 //Hold optionCategory for edit
 var holdTimer;
-$(document).on("mousedown touchstart", ".optionCategory", function () {
-    var categoryObj = $(this).data("category");
-    holdTimer = window.setTimeout(function () { 
-        editOptionCategory(categoryObj);
+$(document).on("mousedown touchstart", ".optionCategory[data-editing-enabled='true']", function () {
+    holdTimer = window.setTimeout(() => { //arrow function in ES6 does not follow normal function scope rules, it goes to its parent's scope for its this
+        editOptionCategory($(this).data("category"));
     }, 1000);
 });
 
 $(document).on("mousedown touchstart", ".workoutEntry", function () {
-    var exerciseObj = $(this).data("values");
-    holdTimer = window.setTimeout(function () {
-        editWorkoutEntry(exerciseObj);
+    holdTimer = window.setTimeout(() => {
+        editWorkoutEntry($(this).data("values"));
     }, 1000);
 });
 
-$(document).on("mouseup touchend", ".optionCategory, .workoutEntry, .favoriteEntry", function () {
+$(document).on("mouseup touchend", ".optionCategory[data-editing-enabled='true'], .workoutEntry, .favoriteEntry, .set", function () {
     if (holdTimer)
         window.clearTimeout(holdTimer);
 });
@@ -1463,7 +1561,7 @@ function editWorkoutEntry(exerciseObj) {
     <div class="categoryTable">
         <table class="width-full">
             <tbody>
-                `+ createCategoryRows(true, exerciseObj.categoryID) + `
+                `+ createCategoryRows(true, exerciseObj.categoryID, false) + `
             </tbody>
         </table>
     </div>`;
@@ -1504,5 +1602,144 @@ $(document).on("click", "#saveExerciseChanges", function () {
 
 $(document).on("click", ".addSetBtn", function () {
     var exerciseID = $(this).data("id");
-    alertMsgToAppend("addSet", true, ["VALUETITLE"], [_exercises[exerciseID].name]);
+    alertMsgToAppend("addSet", true, ["VALUETITLE"], ["Add Set"], [{ attrName: "exerciseId", attrValue: exerciseID },{ attrName: "arrayIndex", attrValue: $(this).data("arrayIndex")}]);
 });
+
+$(document).on("click", ".btnMinus, .btnPlus", function () {
+    var inputSibling = $(this).siblings("input");
+    var input = inputSibling.val();
+
+    if (input.length == 0) {
+        input = 0;
+    } else {
+        input = parseFloat(input);
+    }
+
+    if ($(this).hasClass("btnMinus")) {//minus
+        if (inputSibling.attr("id") == "kgCount") {
+            if (input > 2.5) {
+                input -= 2.5;
+            } else {
+                input = 0;
+            }
+            input = input.toFixed(2);
+            if (input.lastIndexOf("0") == input.length - 1)
+                input = parseFloat(input).toFixed(1);
+
+        } else {
+            if (input > 1) {
+                input--;
+            } else {
+                input = 0;
+            }
+            input = parseInt(input);
+        }
+    } else {
+        if (inputSibling.attr("id") == "kgCount") {
+            input += 2.5;
+            input = input.toFixed(2);
+            if (input.lastIndexOf("0") == input.length - 1)
+                input = parseFloat(input).toFixed(1);
+        } else {
+            input++;
+            input = parseInt(input);
+        }
+    }
+
+    inputSibling.val(input);
+    if (!inputSibling.parent().hasClass("hasValue"))
+        inputSibling.parent().addClass("hasValue");
+});
+
+$(document).on("input", "#repCount", function () {
+    $(this).val(parseInt($(this).val()));
+});
+
+$(document).on("click", ".set[data-has-note='true']", function () {
+    alertMsgToAppend("multiPurposeAlert", true, ["TITLEAREA", "TABLEMULTIPURPOSE", "<!--ADDITIONAL HTML-->", "SAVECHANGESBUTTON", "YESBTN", "CANCELCHANGESBUTTON", "NOBTN"],
+        ["Edit Comment", "hidden", "<textarea class='width-full margin-top-5'>" + $(this).data("note") + "</textarea>", "saveNoteChanges", "Save", "cancelNoteChanges", "Cancel"], [{ attrName: "setDetails", attrValue: $(this).data("setDetails") }]);
+});
+
+$(document).on("click", "#saveNoteChanges", function () {
+    var setDetails = $("#alertBg").data("setDetails");
+    var newNote = $("#alertBg textarea").val().trim();
+    _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note = newNote;
+    saveHistoryWorkouts();
+    if (newNote.length > 0) {
+        $(".set[data-set-details='" + JSON.stringify(setDetails, Object.keys(setDetails).sort()) + "']").data("note", newNote); //JSON could not stringify following property order as declared, so force it so follow alphabetical order of properties
+    } else {
+        $(".set[data-set-details='" + JSON.stringify(setDetails, Object.keys(setDetails).sort()) + "']").attr("data-note", "").attr("data-has-note", false); //this way a unique identifier is created from the details object and can be used to easily query the DOM
+    }
+    closeAlert();
+});
+
+$(document).on("mousedown touchstart", ".set", function () {
+    holdTimer = window.setTimeout(() => {
+        editSet($(this).data("setDetails"));
+    }, 1000);
+});
+
+function editSet(setDetails) {
+    alertMsgToAppend("addSet", true, ["VALUETITLE", '"0.0"', 'value="0"', '</textarea>', "Add Set", "addSetToExercise", "<!--OPTIONALHTML-->"],
+        ["Edit Set", '"' + _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight + '"', 'value="' + _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps + '"', _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note + "</textarea>", "Save Set", "saveEditedSet", `<span id="deleteSetBtn" class="glyphicon glyphicon-trash" data-set-details='` + JSON.stringify(setDetails) + `'></span>`],
+        [{attrName: "setDetails", attrValue: setDetails}]);
+}
+
+$(document).on("click", "#saveEditedSet", function () {
+    var setDetails = $("#alertBg").data("setDetails");
+    var setFromDOM = $(".set[data-set-details='" + JSON.stringify(setDetails, Object.keys(setDetails).sort()) + "']");
+    var changed = false;
+    var notesChanged = false;
+    if (_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight != $("input#kgCount").val().trim()) {
+        changed = true;
+        _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight = $("input#kgCount").val().trim();
+        setFromDOM.children("td:nth-child(2)").children("span").first().html(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight);
+    }
+
+    if (_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps != $("input#repCount").val().trim()) {
+        changed = true;
+        _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps = $("input#repCount").val().trim();
+        setFromDOM.children("td:nth-child(3)").children("span").first().html(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps);
+    }
+
+
+    if (_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note != $("#alertBg textarea").val().trim()) {
+        notesChanged = true;
+        _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note = $("#alertBg textarea").val().trim();
+        setFromDOM.attr("data-has-note", (_historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note.length > 0 ? true : false)).attr("data-note", _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note);
+    }
+
+    if (changed || notesChanged)
+        saveHistoryWorkouts();
+
+    if (changed) {
+        //if the edited set was a record set, then delete it from the records of that exercise
+        checkForRecord(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID, setDetails.date, setDetails.exerciseIndex, setDetails.setIndex, true);
+
+        //once deleted, add the new set to the records if it is eligible
+        let setRecordsResult = setRecords(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID, _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight, _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps, setDetails.date, setDetails.exerciseIndex, setDetails.setIndex);
+
+        loadWorkoutsForToday();
+    }
+    closeAlert();
+});
+
+$(document).on("click", "#cancelNoteChanges", function () {
+    closeAlert();
+});
+
+$(document).on("click", "#deleteSetBtn", function () {
+    deleteSet($(this).data("setDetails"));
+});
+
+function deleteSet(setDetails) {
+    //delete set from _historyWorkouts
+    var indexOfSetsToUpdateOnRecords = [];
+    for (let j = setDetails.setIndex + 1; j <= _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set.length; j++) {
+        indexOfSetsToUpdateOnRecords.push({oldSetIndex: j, newSetIndex = j - 1});
+    }
+    _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set.splice(setDetails.setIndex, 1);
+    //delete set from records if it is a record set
+
+    //if it is a record set, update all other record sets for that exercise on that history workout day
+}

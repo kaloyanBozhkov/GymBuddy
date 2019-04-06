@@ -4,7 +4,7 @@ var _totalMacros, _currentMacros, _historyServings, _singleDayServing, _historyT
 //not using .toDateString in case of language translation in future.
 var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 var dayNames = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
-var _alerts = ["addFavorites", "deleteEntry", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise", "createExercise", "miniAlert", "multiPurposeAlert"];
+var _alerts = ["addFavorites", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise", "createExercise", "miniAlert", "multiPurposeAlert"];
 var _msgBox = {};
 
 //Macros Object
@@ -97,24 +97,24 @@ function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 
     this.exerciseID = ID;
     this.categoryID = category;
     this.comment = description; 
-    this.maxWeight = maxWeight;
-    this.maxReps = maxReps;
-    this.bestTime = bestTime;
+    this.record = [];
 }
 
+function record(weight, reps, date, singleExerciseIndex, setId) {
+    this.reps = reps;
+    this.weight = weight;
+    this.where = {
+        exerciseIndex: singleExerciseIndex,
+        setId: setId,
+        date: date
+    };
+}
+
+//on json convert addSet will be lost.
 function singleExercise(exerciseID) {
     this.exerciseID = exerciseID;
     this.set = [];
-    this.addSet = set;
-}
-
-function getMax(exerciseID) {
-    if (_exercises.hasOwnProperty(exerciseID))
-        return {
-            maxWeight: _exercises[exerciseID].maxWeight,
-            maxReps: _exercises[exerciseID].maxReps,
-            bestTime: _exercises[exerciseID].bestTime
-        }
+    this.addSet = addSet;
 }
 
 function getExerciseDetails(exerciseID, propertyName) {
@@ -122,12 +122,11 @@ function getExerciseDetails(exerciseID, propertyName) {
         return _exercises[exerciseID][propertyName];
 }
 
-function set(weight, reps, time, note = "") { //many for each exercise
+function addSet(weight, reps, note = "") { //many for each exercise
     this.set.push({
         note: note,
         weight: weight,
-        reps: reps,
-        rest: rest
+        reps: reps
     });
 }
 
@@ -158,4 +157,12 @@ function addIteratorToObject(obj) {
             }
         }
     });
+}
+
+function mixinCopyObj(obj) {
+    var newObj = Object.create(null);
+    for (let property of Object.keys(obj))
+        newObj[property] = obj[property];
+
+    return newObj;
 }
