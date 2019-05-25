@@ -1,7 +1,10 @@
 'use strict'
 $(document).ready(function () {
-    var time = window.getCurrentTime();
+    $("#header").animate({
+        "top": "0px"
+    }, 500);
 
+    var time = window.getCurrentTime();
     if (doesNotExist(localStorage.getItem("historyServings"))) {
         newSingleDayServing(time);
         localStorage.setItem("singleDayServing", JSON.stringify(window._singleDayServing));
@@ -42,6 +45,7 @@ $(document).ready(function () {
         _exercises = JSON.parse(localStorage.getItem("exercises"));
     }
     preloadAlerts();
+    preloadPages();
 });
 
 
@@ -53,6 +57,13 @@ function preloadAlerts() { //pre loads all possible message boxes, so that in re
     }
 }
 
+function preloadPages() {
+    for (let j = 0; j < _pageNames.length; j++) {
+        $.get(_pageNames[j] + ".html", function (data) {
+            _pages[_pageNames[j]] = data;
+        });
+    }
+}
 
 function newSingleDayServing(time) {
     window._singleDayServing = new window.singleDayServing(time.day, time.month, time.year);
@@ -90,73 +101,73 @@ $("#btnMacros, #btnWorkouts").on("click", function () {
     $(this).siblings().width(width2);
 
 
-
     loadContent(_selected);
 });
 
 function loadContent(what) {//initializes one part of the app vs the other
     if (what !== "none") {
         _originalBodyContent = $("#body").html();
-        $.get(what + ".html", function (data) {
-            $("#body").empty().append(data);
-            pushTopAnimation("#pushContent", what);
-            let d = returnPastDate(1);
-            if (what == "macros") {
-                updateBarWidths();
-                checkHistoryServings(d);
-                updateOldBarWidths(d);
-                loadWeeklyStatsGraph();
-                localStorage.setItem("lastOpened", "macros");
-            } else {//workouts
-                checkHistoryWorkouts(d);
-                localStorage.setItem("lastOpened", "workouts");
+        $("#body").empty().append(_pages[what]);
+        pushTopAnimation("#pushContent", what);
+        let d = returnPastDate(1);
+        if (what == "macros") {
+            updateBarWidths();
+            checkHistoryServings(d);
+            updateOldBarWidths(d);
+            loadWeeklyStatsGraph();
+            localStorage.setItem("lastOpened", "macros");
+        } else {//workouts
+            checkHistoryWorkouts(d);
+            localStorage.setItem("lastOpened", "workouts");
 
-                if (!doesNotExist(localStorage.getItem("_historyWorkouts")))
-                    _historyWorkouts = JSON.parse(localStorage.getItem("_historyWorkouts"));
+            if (!doesNotExist(localStorage.getItem("_historyWorkouts")))
+                _historyWorkouts = JSON.parse(localStorage.getItem("_historyWorkouts"));
 
-                if (!doesNotExist(localStorage.getItem("_exercises"), false)) {
-                    _exercises = JSON.parse(localStorage.getItem("_exercises"));
-                } else {
-                    setDefaultExercises();
-                }
-
-                if (!doesNotExist(localStorage.getItem("_exerciseCategories"))) {
-                    _exerciseCategories = JSON.parse(localStorage.getItem("_exerciseCategories"));
-                } else {
-                    setDefaultCategories();
-                }
-
-                loadWorkoutsForToday();
-                //Add iterator to objects to have direct access to its property values
-                if (!_exercises.hasOwnProperty(Symbol.iterator))
-                    addIteratorToObject(_exercises);
-
-                if (!_exerciseCategories.hasOwnProperty(Symbol.iterator))
-                    addIteratorToObject(_exerciseCategories);
-
-                if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
-                    addIteratorToObject(_historyWorkouts);
+            if (!doesNotExist(localStorage.getItem("_exercises"), false)) {
+                _exercises = JSON.parse(localStorage.getItem("_exercises"));
+            } else {
+                setDefaultExercises();
             }
-        });
+
+            if (!doesNotExist(localStorage.getItem("_exerciseCategories"))) {
+                _exerciseCategories = JSON.parse(localStorage.getItem("_exerciseCategories"));
+            } else {
+                setDefaultCategories();
+            }
+
+            loadWorkoutsForToday();
+            //Add iterator to objects to have direct access to its property values
+            if (!_exercises.hasOwnProperty(Symbol.iterator))
+                addIteratorToObject(_exercises);
+
+            if (!_exerciseCategories.hasOwnProperty(Symbol.iterator))
+                addIteratorToObject(_exerciseCategories);
+
+            if (!_historyWorkouts.hasOwnProperty(Symbol.iterator))
+                addIteratorToObject(_historyWorkouts);
+        }
     } else {
-        $("#pushContent").animate({
-            "opacity": "0"
-        }, 200, function () {
-            $("#body").empty().append(_originalBodyContent.replace("parent", "parent opacity-0"));
+        $("#pushContent").children("div").each(function (i, e) {
+            $(e).addClass("animatedOut");
+        });
+        setTimeout(function () {
+            $("#body").empty().append(_originalBodyContent.replace("parent both-full", "parent opacity-0 both-full"));
             $("#body .opacity-0").animate({
                 "opacity": "1"
-            }, 200);
+            }, 250);
             localStorage.removeItem("lastOpened");
-        });
+        }, 300);
     }
 
 }
-
 function pushTopAnimation(element, what) {
-    $(element).animate({
-        "top": "0",
-        "opacity": "1"
-    }, 1000);
+    var delay = 0; //regardless of how many children div, all will animate
+    $(element).children("div").each(function (i, e) {
+        setTimeout(function () {
+            $(e).addClass("animatedIn");
+        }, delay);
+        delay += 250 - (i * 50);
+    });
 }
 
 function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServing = _singleDayServing, msg = "No servings have been added for today yet") {
@@ -200,9 +211,9 @@ function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServ
             let fats = round(parseFloat(item.fats) * parseFloat(item.servingQuantity));
             let tmpObj = {
                 title: item.itemName,
-                proteins: proteins,
-                fats: fats,
-                carbs: carbs,
+                proteins: round(proteins / item.servingQuantity),
+                fats: round(fats / item.servingQuantity),
+                carbs: round(carbs / item.servingQuantity),
                 grams: item.servingSize
             }
             let valuesToReplace = ["FOODNAME", "TIME", "HIDELAST", "FATS", "CARBS", "PROTEINS", "CALS", "SERV", "GRMS", "ATTRNAME", "DATAVALUES"];
@@ -223,7 +234,7 @@ function loadDailyServings(entriesContainer = "#entriesContainer", singleDayServ
 }
 
 function replaceArrays(string, arrayOne, arrayTwo) {
-    for (let j in arrayOne) 
+    for (let j in arrayOne)
         string = string.replace(arrayOne[j], arrayTwo[j]);
 
     return string;
@@ -852,7 +863,7 @@ function searchThroughList(optionElementClass, optionContainer, dis, runSecondPa
         $(optionElementClass).each(function () {
             let vals = $(this).data("values");
             if ((vals.hasOwnProperty("title") && vals.title.toLowerCase().indexOf(dis.val().trim().toLowerCase()) == -1) ||
-                (vals.hasOwnProperty("name") && vals.name.toLowerCase().indexOf(dis.val().trim().toLowerCase()) == -1)){
+                (vals.hasOwnProperty("name") && vals.name.toLowerCase().indexOf(dis.val().trim().toLowerCase()) == -1)) {
                 $(this).addClass("hidden");
             } else {
                 $(this).removeClass("hidden");
@@ -878,7 +889,7 @@ function searchThroughList(optionElementClass, optionContainer, dis, runSecondPa
         });
         $(optionContainer + " > .last").removeClass("last");
         $(optionContainer + " > div:not(.hidden)").last().addClass("last");
-    }    
+    }
 }
 
 $(document).on("click", ".deleteFavorite", function () {
@@ -1045,7 +1056,7 @@ $(document).on("click", "#myDopeTable > div", function () {
             fats: parseFloat((parseFloat($(this).data("values").calsFats) / 9).toFixed(2)),
             calories: calculateCalories
         };
-        
+
         $("#graphOldValuesDisplayer > div").slideUp(250, function () {
             $("#graphOldValuesDisplayer > div > p").hide();
 
@@ -1132,50 +1143,55 @@ function loadWorkoutsForToday() {
             let setsDiv = "";
             let totalVolumeDiv = "";
             let totalVolume = 0;
-            div += `<div class="individualExercise box-shadow silver-bg jet-fg coolBorder generalSheetFormating margin-top-15 margin-bottom-10 noselect">
+            div += `<div class="individualExercise noselect margin-bottom-15">
                 <div class="workoutHeader">
-                    <h3 class="margin-0">`+ _exercises[singleExercise.exerciseID].name +`</h3>
+                    <h3 class="margin-0">`+ _exercises[singleExercise.exerciseID].name + `</h3>
+                    <span id="deleteExerciseBtn" class="fas fa-times" data-exercise-details='`+ JSON.stringify({ exerciseID: singleExercise.exerciseID, exerciseIndex: indexCounter, date: todayDate }) + `'></span>
                 </div>
-                <div class="workoutContent" data-empty="`+ (singleExercise.set.length == 0 ? "true" : "false") + `" data-id='` + singleExercise.exerciseID +`' ">
+                <div class="workoutContent" data-empty="`+ (singleExercise.set.length == 0 ? "true" : "false") + `" data-id='` + singleExercise.exerciseID + `' ">
                     <!-- start sets -->
                     ` + (singleExercise.set.length == 0 ? "" : "#SETS#") + `
                     <!-- last div of type set have border bottom and data-attribute for total weight -->
                     <div class="addSet">
-                        <span data-array-index='`+ indexCounter +`' data-id='` + singleExercise.exerciseID +`'  class="addSetBtn glyphicon glyphicon-plus"></span>
-                        `+ (singleExercise.set.length == 0  ? '<p class="noSets">No sets added yet.</p>' : "") +`                    
+                        <span data-array-index='`+ indexCounter + `' data-id='` + singleExercise.exerciseID + `'  class="addSetBtn fas fa-plus-square"></span>
+                        `+ (singleExercise.set.length == 0 ? '<p class="noSets">No sets added yet.</p>' : "") + `                    
                     </div>
                     ` + (singleExercise.set.length == 0 ? "" : "#TOTALVOLUME#") + `
-                    <div class="separator inline-block"></div>
-                    <p data-date='`+ todayDate + `' data-id='` + singleExercise.exerciseID +`' class='viewHistory'>View History</p>    
+                    <hr class='fancySeparator'>
+                    <div class='workoutHistory'>
+                        <hr class='fancySeparator'>              
+                    </div>
+                    <div class='historyButtonWrapper'><p data-date='`+ todayDate + `' data-id='` + singleExercise.exerciseID + `'>View History</p></div>
                 </div>
             </div>`;
 
-             if (singleExercise.set.length > 0)
-                 setsDiv += "<table class='setsTable'><tbody>";
+            if (singleExercise.set.length > 0) {
+                setsDiv += "<div class='setsTable'>";
+                let setIndexCounter = 0;
+                for (var set of singleExercise.set) {//array of sets
+                    setsDiv += `<div class="set" data-set-details='` + JSON.stringify({ date: todayDate, exerciseIndex: indexCounter, setIndex: setIndexCounter++ }) + `' data-record="` + (checkForRecord(singleExercise.exerciseID, todayDate, indexCounter, setIndexCounter) == true ? "visible" : "invisible") + `" data-has-note="` + (set.note.length > 0 ? "true" : "false") + `"` + (set.note.length > 0 ? ` data-note='` + set.note + `'` : "") + `>
+                        <div class="recordSection">
+                            <div data-set-index='`+ setIndexCounter +`'></div>
+                            <span class="fas fa-trophy"></span>
+                            <span class="fas fa-comment-dots"></span>
+                        </div>
+                        <div class="weightSection">
+                           <div><p>` + set.weight + `</p></div>
+                           <div><p>` + set.reps + `</p></div>
+                        </div>
+                    </div>`;
+                    totalVolume += parseFloat(set.weight) * set.reps;
+                }
+                setsDiv += "</div>";
+            }
 
-             let setIndexCounter = 0;
-             for (var set of singleExercise.set) {//array of sets
-                 setsDiv += `<tr class="set" data-set-details='` + JSON.stringify({ date: todayDate, exerciseIndex: indexCounter, setIndex: setIndexCounter }) + `' data-record="` + (checkForRecord(singleExercise.exerciseID, todayDate, indexCounter, setIndexCounter++) == true ? "visible" : "invisible") + `" data-has-note="` + (set.note.length > 0 ? "true" : "false") + `"` + (set.note.length > 0 ? ` data-note='` + set.note + `'` : "") +`>
-                    <td class="recordSection">
-                        <span class="glyphicon glyphicon-flag"></span><span class="glyphicon glyphicon-comment"></span>
-                    </td>
-                        <td><span>` + set.weight + `</span> <span>kg</span></td>
-                        
-                        <td><span>` + set.reps + `</span> <span>reps</span></td>
-                </tr>`;
-                 totalVolume += parseFloat(set.weight) * set.reps;
-             }
-
-             if (singleExercise.set.length > 0)
-                 setsDiv += "</tbody></table>";
-
-             //sdasd
-             totalVolumeDiv = `<div class="totalVolume">
-                            <p><span>`+ round(totalVolume) +` kg</span></p>
+            //sdasd
+            totalVolumeDiv = `<div class="totalVolume">
+                            <p><span>`+ round(totalVolume) + ` kg</span></p>
                         </div>`;
 
-             div = div.replace("#SETS#", setsDiv).replace("#TOTALVOLUME#", totalVolumeDiv);
-             indexCounter++;
+            div = div.replace("#SETS#", setsDiv).replace("#TOTALVOLUME#", totalVolumeDiv);
+            indexCounter++;
         }
         $("#workoutsToday").append(div);
         $("#exercisesMsg").addClass("hidden");
@@ -1186,7 +1202,7 @@ function loadWorkoutsForToday() {
 }
 
 function checkForRecord(exerciseID, date, exerciseIndex, setId, deleteFound = false) {
-    if (_exercises[exerciseID].record != 0) {
+    if (_exercises[exerciseID].record.length > 0) {
         let recordIndex = 0;
         for (let record of _exercises[exerciseID].record) {//of used to access the array items dirrectly instead of getting the item index and then using that to get value from array, although ironically i am using a personal index counter to delete the array item lol
             if (record.where.date == date &&
@@ -1196,7 +1212,6 @@ function checkForRecord(exerciseID, date, exerciseIndex, setId, deleteFound = fa
                     _exercises[exerciseID].record.splice(recordIndex, 1);
                     saveExercises();
                 }
-
                 return true;
             }
             recordIndex++;
@@ -1350,13 +1365,13 @@ $(document).on("click", "#removeFromWorkouts", function () {
         while (notFound) {
             notFound = false;
             for (let singleExerciseArray of _historyWorkouts) {
-                for (let singleExercise of singleExerciseArray.obj){
+                for (let singleExercise of singleExerciseArray.obj) {
                     if (singleExercise.exerciseID == exerciseIDToDelete) {
                         singleExerciseArray.obj.splice(singleExerciseArray.obj.indexOf(singleExercise), 1);
                         notFound = true;
                     }
                 }
-                if (singleExerciseArray.obj.length == 0) 
+                if (singleExerciseArray.obj.length == 0)
                     delete _historyWorkouts[singleExerciseArray.relativeKey];
             }
         }
@@ -1396,7 +1411,8 @@ function saveHistoryWorkouts() {
 var previousAlertToShow = {
     createExercise: addNewExercise,
     newCategory: createNewExercise,
-    deleteFavorite: loadServing
+    deleteFavorite: loadServing,
+    deleteSet: editSet
 };
 
 $(document).on("click", "#saveNewExercise", function () {
@@ -1436,7 +1452,7 @@ function createCategoryRows(checkSpecificCategory = false, categoryIdToCheck = 0
     if (Object.keys(_exerciseCategories).length > 0) {
         var isFirstRow = true;
         for (let exerciseCategory of _exerciseCategories) {
-            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `' data-editing-enabled='` + JSON.stringify(enableEditing) +`'>
+            categoryRows += `<tr class='optionCategory' data-category='` + JSON.stringify(exerciseCategory) + `' data-editing-enabled='` + JSON.stringify(enableEditing) + `'>
                         <td>
                             <div class='position-relative'>
                                 <input value='` + exerciseCategory.relativeKey + `' type="radio" name="category" ` + (checkSpecificCategory ? (exerciseCategory.relativeKey == categoryIdToCheck ? "checked" : "") : (isFirstRow ? "checked" : "")) + `>
@@ -1602,7 +1618,7 @@ $(document).on("click", "#saveExerciseChanges", function () {
 
 $(document).on("click", ".addSetBtn", function () {
     var exerciseID = $(this).data("id");
-    alertMsgToAppend("addSet", true, ["VALUETITLE"], ["Add Set"], [{ attrName: "exerciseId", attrValue: exerciseID },{ attrName: "arrayIndex", attrValue: $(this).data("arrayIndex")}]);
+    alertMsgToAppend("addSet", true, ["VALUETITLE"], ["Add Set"], [{ attrName: "exerciseId", attrValue: exerciseID }, { attrName: "arrayIndex", attrValue: $(this).data("arrayIndex") }]);
 });
 
 $(document).on("click", ".btnMinus, .btnPlus", function () {
@@ -1682,7 +1698,7 @@ $(document).on("mousedown touchstart", ".set", function () {
 function editSet(setDetails) {
     alertMsgToAppend("addSet", true, ["VALUETITLE", '"0.0"', 'value="0"', '</textarea>', "Add Set", "addSetToExercise", "<!--OPTIONALHTML-->"],
         ["Edit Set", '"' + _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight + '"', 'value="' + _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps + '"', _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].note + "</textarea>", "Save Set", "saveEditedSet", `<span id="deleteSetBtn" class="glyphicon glyphicon-trash" data-set-details='` + JSON.stringify(setDetails) + `'></span>`],
-        [{attrName: "setDetails", attrValue: setDetails}]);
+        [{ attrName: "setDetails", attrValue: setDetails }]);
 }
 
 $(document).on("click", "#saveEditedSet", function () {
@@ -1716,8 +1732,8 @@ $(document).on("click", "#saveEditedSet", function () {
         //if the edited set was a record set, then delete it from the records of that exercise
         checkForRecord(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID, setDetails.date, setDetails.exerciseIndex, setDetails.setIndex, true);
 
-        //once deleted, add the new set to the records if it is eligible
-        let setRecordsResult = setRecords(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID, _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].weight, _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set[setDetails.setIndex].reps, setDetails.date, setDetails.exerciseIndex, setDetails.setIndex);
+        //once deleted update all other record sets for that exercise
+        updateRecords(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID);
 
         loadWorkoutsForToday();
     }
@@ -1729,17 +1745,80 @@ $(document).on("click", "#cancelNoteChanges", function () {
 });
 
 $(document).on("click", "#deleteSetBtn", function () {
-    deleteSet($(this).data("setDetails"));
+    alertMsgToAppend("miniAlert", true, ["MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"],
+        ["Are you sure you want to delete the set?", "confirmDeleteSetBtn", "cancelDeleteSet", "Delete", "Cancel"], [{ attrName: "setDetails", attrValue: $(this).data("setDetails") }]);
 });
 
-function deleteSet(setDetails) {
-    //delete set from _historyWorkouts
-    var indexOfSetsToUpdateOnRecords = [];
-    for (let j = setDetails.setIndex + 1; j <= _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set.length; j++) {
-        indexOfSetsToUpdateOnRecords.push({oldSetIndex: j, newSetIndex = j - 1});
-    }
-    _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set.splice(setDetails.setIndex, 1);
-    //delete set from records if it is a record set
+$(document).on("click", "#cancelDeleteSet", function () {
+    previousAlertToShow.deleteSet($("#alertBg").data("setDetails"));
+});
 
-    //if it is a record set, update all other record sets for that exercise on that history workout day
+$(document).on("click", "#confirmDeleteSetBtn", function () {
+    deleteSets([$("#alertBg").data("setDetails")]);
+    loadWorkoutsForToday();
+    closeAlert();
+});
+//setRecords(exerciseID, weight, reps, todayDate, singleExerciseIndex, setId).
+//Keep sets array related to one exercise at a time!
+function deleteSets(sets) {
+    let c = 0;
+
+    for (let setDetails of sets) {
+        //delete sets from _historyWorkouts
+        _historyWorkouts[setDetails.date][setDetails.exerciseIndex].set.splice(setDetails.setIndex, 1);//Delete set!
+
+        //delete set from records if it is a record set
+        checkForRecord(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID, setDetails.date, setDetails.exerciseIndex, setDetails.setIndex, true);
+
+        if (++c == sets.length) //update all other record sets for that exercise
+            updateRecords(_historyWorkouts[setDetails.date][setDetails.exerciseIndex].exerciseID);
+    }
+
+    saveExercises();
+    saveHistoryWorkouts();
+}
+
+//used to loop through all specific exercise sets ever imported and re-set the records
+function updateRecords(exerciseID) {
+    for (let dayWorkout in _historyWorkouts) {
+        let singleExerciseIndex = 0;
+        for (let exercise of _historyWorkouts[dayWorkout]) {
+            let setCounter = 0;
+            if (exercise.exerciseID == exerciseID)
+                for (let set of exercise.set)
+                    setRecords(exerciseID, set.weight, set.reps, dayWorkout, singleExerciseIndex, setCounter++);
+
+            singleExerciseIndex++;
+        }
+    }
+}
+
+$(document).on("click", "#deleteExerciseBtn", function () {
+    alertMsgToAppend("miniAlert", true, ["MSG", "IDOFYESBTN", "IDOFNOBTN", "YESMESG", "NOMESG"],
+        ["Are you sure you want to delete these records?", "confirmDeleteExerciseBtn", "cancelDeleteExercise", "Delete", "Cancel"], [{ attrName: "exerciseDetails", attrValue: $(this).data("exerciseDetails") }]);
+});
+
+$(document).on("click", "#confirmDeleteExerciseBtn", function () {
+    var exerciseDetails = $("#alertBg").data("exerciseDetails");
+    deleteExercise(exerciseDetails);
+    loadWorkoutsForToday();
+    closeAlert();
+});
+
+function deleteExercise(exerciseDetails) {
+    var formattedSetsObject = _historyWorkouts[exerciseDetails.date][exerciseDetails.exerciseIndex].set.map(x => {
+        let obj = {};
+        for (let property of Object.keys(x)) {
+            obj[property] = x[property];
+            obj["exerciseIndex"] = exerciseDetails.exerciseIndex;
+            obj["date"] = exerciseDetails.date;
+        }
+        return obj;
+    });
+
+    deleteSets(formattedSetsObject);
+    console.log(_historyWorkouts[exerciseDetails.date][exerciseDetails.exerciseIndex]);
+    //if other exercises have records for the day on which you delete an exercise then update their
+    _historyWorkouts[exerciseDetails.date].splice(exerciseDetails.exerciseIndex, 1);
+    saveHistoryWorkouts();
 }

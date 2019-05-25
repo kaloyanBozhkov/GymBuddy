@@ -6,6 +6,8 @@ var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept"
 var dayNames = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 var _alerts = ["addFavorites", "importFromFavorites", "setGoalsGrams", "setGoalsPercentages", "setGoalsWhich", "setServingSize", "addSet", "addNewExercise", "createExercise", "miniAlert", "multiPurposeAlert"];
 var _msgBox = {};
+var _pageNames = ["workouts", "macros"];
+var _pages = {};
 
 //Macros Object
 function totalMacros(totalFats, totalCarbs, totalProteins, month, day, year) {
@@ -98,6 +100,7 @@ function exercise(ID, name, description, category = 1, maxWeight = 0, maxReps = 
     this.categoryID = category;
     this.comment = description; 
     this.record = [];
+
 }
 
 function record(weight, reps, date, singleExerciseIndex, setId) {

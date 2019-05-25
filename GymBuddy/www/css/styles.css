@@ -97,7 +97,7 @@ margin-top: 20px;
 }
 
 .margin-top-30 {
-margin-top: 30px;
+    margin-top: 30px;
 }
 
 .parent {
@@ -148,8 +148,10 @@ word-break: break-word;
 }
 /* Specific CSS */
 #body {
-min-width: 280px;
-overflow: auto;
+    min-width: 280px;
+    overflow-y: auto;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 #header {
@@ -226,23 +228,85 @@ transform: scale(0.8);
 }
 
 #pushContent {
-top: 85%;
-left: 0;
-opacity: 0;
+    left: 0;
+    top:0;
 }
+
+#pushContent > div {
+    position: relative;
+    opacity: 0;
+    top: 105%;
+    transition-timing-function: ease-in-out;
+}
+
+#pushContent > div:nth-child(odd) {
+    left: 0;
+}
+#pushContent > div:nth-child(even) {
+    right: 0;
+}
+
+#pushContent > .animatedIn {
+    top: 0;
+    opacity: 1;
+    transition: all 500ms;
+}
+
+#pushContent > .animatedIn.animatedOut {
+    transition: all 250ms;
+}
+
+
+#pushContent > .animatedIn.animatedOut:nth-child(odd) {
+    left: -100%;
+}
+
+
+#pushContent > .animatedIn.animatedOut:nth-child(even) {
+    right: -100%;
+}
+
+
 
 .coolBorder {
 border: 1px solid #a59fa1;
 }
 
 .generalSheetFormating {
-margin: 0 auto;
-width: 95%;
-padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 95%;
+    padding: 5px;
+}
+.generalSheetFormating.withGold{
+    position: relative;
+    overflow: hidden;
+}
+.generalSheetFormating.withGold::before, .generalSheetFormating.withGold::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: #E8B558;
+    bottom: -25px;
+    transform: rotate(45deg);
+}
+
+.generalSheetFormating.withGold::before {
+    left: -25px;
+}
+
+.generalSheetFormating.withGold::after {
+    right: -25px;
+}
+
+.generalSheetFormating.silver-bg {
+    background-color:rgba(234, 234, 234, 0.65);
 }
 
 #caloriesCounter {
-margin-top: 75px;
+margin-top: 80px;
 }
 
 #caloriesCounter p, .formatP, #caloriesCounterHistory p {
@@ -328,15 +392,16 @@ background-color: rgba(0,0,0,0.2);
 }
 
 #displayMessage {
-width: 95%;
-margin: 0 auto;
-padding: 10px;
-max-width: 400px;
-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.45);
-animation-name: popIn;
-animation-fill-mode: forwards;
-animation-duration: 400ms;
-animation-direction: normal
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+    max-width: 400px;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.45);
+    animation-name: popIn;
+    animation-fill-mode: forwards;
+    animation-duration: 400ms;
+    animation-direction: normal;
+    border-radius: 5px;
 }
 
 @keyframes popIn {
@@ -642,13 +707,13 @@ transform: rotate(0deg);
 
 .box-shadow {
 transition: all 0.5s;
-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.15);
--webkit-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.15);
+box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.2);
+-webkit-box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.2);
 }
 
 .box-shadow:hover, .box-shadow:focus {
-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.45);
--webkit-box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.45);
+    box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 0px 4px 2px rgba(0, 0, 0, 0.3);
 }
 
 .vertical-align-top {
@@ -1152,8 +1217,7 @@ display: none;
 }
 /*WORKOUTS*/
 #pushContent.workout > div:not(.hidden):first-of-type {
-margin-top: 85px;
-margin-bottom: 20px;
+margin-top: 90px;
 }
 
 #exercisesMsg {
@@ -1216,9 +1280,12 @@ width: 16px;
 height: 50px;
 top: 0;
 }
-
+#workoutsToday{
+    display: flex;
+    flex-direction: column-reverse;
+}
 #workoutsToday > h3 {
-margin: 20px;
+    margin: 20px;
 }
 
 #separator {
@@ -1234,12 +1301,14 @@ padding: 20px;
 }
 
 .individualExercise {
-padding: 10px;
+
+padding:10px;
 }
 
 .individualExercise .workoutHeader h3 {
-padding-bottom: 10px;
+padding-bottom: 5px;
 border-bottom: 1px solid #a59fa1;
+padding-right:40px;
 }
 
 .individualExercise .set {
@@ -1383,7 +1452,7 @@ font-size: 22px;
 font-weight: bold;
 }
 
-.individualExercise ..totalVolume p::after {
+.individualExercise .totalVolume p::after {
 content: '(total volume)';
 display: block;
 font-weight: 100;
@@ -1553,15 +1622,21 @@ position: relative;
 #addNewCategory::before{
 top: 1px;
 }
+#deleteCategoryBtn, #deleteSetBtn, #deleteExerciseBtn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 20px;
+    transition: all 400ms;
+}
 #deleteCategoryBtn, #deleteSetBtn {
-position: absolute;
-top: 0;
-right: 0;
-padding: 10px;
-font-size: 20px;
-transition: all 400ms;
+    padding: 10px;
+}
+
+#deleteExerciseBtn{
+    padding: 5px;
 }
 
 #deleteCategoryBtn:hover, #deleteCategoryBtn:active, #deleteCategoryBtn:focus {
-transform: rotate(-15deg);
+    transform: rotate(-15deg);
 }
