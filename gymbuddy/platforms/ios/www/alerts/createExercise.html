@@ -1,0 +1,40 @@
+<h3 class="text-center">New Exercise</h3>
+<div class="width-full inputStyling tableStyling">
+    <table class="width-full h3To22">
+        <tbody class="width-full">
+            <tr>
+                <td>
+                    <h3>Title:</h3>
+                </td>
+                <td data-placeholder="Exercise Name" class="position-relative withPlaceholder">
+                    <input id="exerciseName" class="camelCaseInput" type="text" value="" />
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3>Notes:</h3>
+                </td>
+                <td data-placeholder="Optional" class="position-relative withPlaceholder">
+                    <input id="description" type="text" value="" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Category: <span style="font-size: 14px; vertical-align:middle">(hold to edit)</span></h3>
+    <div class="categoryTable">
+        <table class="width-full">
+            <tbody>
+                <!--CATEGORYOPTIONS-->
+            </tbody>
+        </table>
+       <div class="text-center">
+           <span id="addNewCategory" class="glyphicon glyphicon-plus"></span>
+           <p class="margin-0">New Category</p>
+       </div>
+    </div>
+</div>
+<p class="errorMsg width-full text-center margin-top-10">The exercise must have a title before continuing.</p>
+<div class="separator block margin-top-10 margin-bottom-10"></div>
+<div class="width-full text-center">
+    <p id="cancelNewExercise" class="inline-block buttonStyled coolBorder buttonCancel">Cancel</p><p id="saveNewExercise" class="inline-block buttonStyled coolBorder">Save Exercise</p>
+</div>

@@ -1,0 +1,32 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-sqlite-2": {
+      "PACKAGE_NAME": "com.kaloyanbozhkov.gymbuddy"
+    },
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "com.kaloyanbozhkov.gymbuddy"
+    }
+  },
+  "dependent_plugins": {},
+  "modules": [
+    {
+      "file": "plugins/cordova-plugin-sqlite-2/dist/sqlite-plugin.js",
+      "id": "cordova-plugin-sqlite-2.sqlitePlugin",
+      "pluginId": "cordova-plugin-sqlite-2",
+      "clobbers": [
+        "sqlitePlugin"
+      ]
+    }
+  ],
+  "plugin_metadata": {
+    "cordova-plugin-sqlite-2": "1.0.6",
+    "cordova-plugin-whitelist": "1.3.3"
+  }
+}

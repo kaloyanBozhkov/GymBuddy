@@ -1,0 +1,353 @@
+<div id="pushContent" class="position-absolute both-full">
+    <div id="caloriesCounter" class="box-shadow silver-bg jet-fg generalSheetFormating">
+        <p class="width-full text-center">Calories: <span id="currentCalories"></span>/<span id="totalCalories"></span></p>
+        <p>Fats: <span id="currentFats"></span>/<span id="totalFats"></span>g <span id="warningFats"  class="hidden glyphicon glyphicon-warning-sign"></span></p>
+        <div class="showBar position-relative overflow-xy-hidden coolBorder">
+            <div id="barFats" class="position-absolute barLoad block"></div>
+        </div>
+        <p>Carbs: <span id="currentCarbs"></span>/<span id="totalCarbs"></span>g <span id="warningCarbs" class="hidden glyphicon glyphicon-warning-sign"></span></p>
+        <div class="showBar position-relative overflow-xy-hidden coolBorder">
+            <div id="barCarbs" class="position-absolute barLoad block"></div>
+        </div>
+        <p>Proteins: <span id="currentProteins"></span>/<span id="totalProteins"></span>g <span id="warningProteins"  class="hidden glyphicon glyphicon-warning-sign"></span></p>
+        <div class="showBar position-relative overflow-xy-hidden coolBorder">
+            <div id="barProteins" class="position-absolute barLoad block"></div>
+        </div>
+        <div class="separator block margin-top-20 margin-bottom-10"></div>
+        <div id="setGoals" class="width-full text-center noselect">
+            <p class="inline-block buttonStyled coolBorder">Set Goals</p>
+        </div>
+    </div>
+    <div id="foodTracker" class="box-shadow silver-bg jet-fg generalSheetFormating margin-top-30">
+        <input type="text" id="foodName" placeholder="Type food name here" value="" class="text-center block camelCaseInput" />
+
+        <div style="white-space:nowrap;" class="width-full margin-top-10 ">
+            <div id="singleFoodServingSize" class="macroBlock block width-full text-center">
+                <p class="text-center block">Grams:</p>
+                <input type="text" value="0" class="text-center block" />
+            </div><div id="singleFoodFats" class="macroBlock inline-block text-center">
+                <p>Fats:</p>
+                <input type="text" value="0" class="text-center fatsRed" />
+            </div><div id="singleFoodCarbs" class="macroBlock inline-block text-center">
+                <p>Carbs:</p>
+                <input type="text" value="0" class="text-center carbsOrange" />
+            </div><div id="singleFoodProteins" class="macroBlock inline-block text-center">
+                <p>Proteins:</p>
+                <input type="text" value="0" class="text-center proteinsGreen" />
+            </div>
+        </div>
+        <div id="buttonArea" class="noselect margin-top-20">
+            <p id="addServing" class="buttonStyled coolBorder text-center block margin-top-10">Add Serving</p>
+            <p id="loadServing" class="buttonStyled coolBorder text-center block margin-top-10">Import From Favorites</p>
+        </div>
+    </div>
+    <div id="dailyHistory" class="box-shadow silver-bg jet-fg generalSheetFormating margin-top-30">
+        <div class="width-full text-center">
+            <p class="inline-block formatP">Today's Entries</p>
+        </div>
+        <div id="entriesContainer" class="width-full">
+
+
+        </div>
+    </div>
+    <div class="jet-fg margin-top-30">
+        <div class="width-full text-center position-relative">
+            <h3 class="inline-block formatP">History & Stats</h3>
+        </div>
+    </div>
+
+
+    <div class="box-shadow silver-bg jet-fg generalSheetFormating margin-top-10">
+        <div id="menuHistoryServings" class="position-relative w-100 text-center">
+            <p class="inline-block margin-0 font-size-22 nowrap"><span id="dayEntriesShownFor"></span></p>
+            <div id="menu-left" class="position-absolute">
+                <span class="glyphicon glyphicon glyphicon-menu-left"></span>
+            </div>
+            <div id="menu-right" class="position-absolute hidden">
+                <span class="glyphicon glyphicon glyphicon-menu-right"></span>
+            </div>
+        </div>
+        <div id="caloriesCounterHistory">
+
+
+            <p class="width-full text-center">Calories: <span id="currentCaloriesHistory"></span>/<span id="totalCaloriesHistory"></span></p>
+            <p>Fats: <span id="currentFatsHistory"></span>/<span id="totalFatsHistory"></span>g</p>
+            <div class="showBar position-relative overflow-xy-hidden coolBorder">
+                <div id="barFatsHistory" class="position-absolute barLoad block"></div>
+            </div>
+            <p>Carbs: <span id="currentCarbsHistory"></span>/<span id="totalCarbsHistory"></span>g</p>
+            <div class="showBar position-relative overflow-xy-hidden coolBorder">
+                <div id="barCarbsHistory" class="position-absolute barLoad block"></div>
+            </div>
+            <p>Proteins: <span id="currentProteinsHistory"></span>/<span id="totalProteinsHistory"></span>g</p>
+            <div class="showBar position-relative overflow-xy-hidden coolBorder">
+                <div id="barProteinsHistory" class="position-absolute barLoad block"></div>
+            </div>
+        </div>
+    </div>
+    <div id="pastDailyHistory" class="box-shadow silver-bg jet-fg generalSheetFormating margin-top-30">
+        <div class="width-full text-center">
+            <p class="inline-block formatP">Entries</p>
+        </div>
+        <div id="pastEntriesContainer" class="width-full">
+
+
+        </div>
+    </div>
+
+    <div id="past7DaysStats" class="box-shadow silver-bg jet-fg generalSheetFormating margin-top-30 margin-bottom-10">
+        <div class="width-full text-center">
+            <p class="inline-block formatP">Caloric distribution - 7 Days</p>
+            <div id="graphOldValuesDisplayer">
+                <div>
+                    <p>Select a day to show details</p>
+                    <div class="row text-center">
+                        <div class="col-xs-12 text-center">
+                            <p class="margin-0">Calories: <span></span></p>
+                        </div>
+                        <div class="col-xs-4">
+                            <p class="margin-0">Fats:</p>
+                            <p class="fatsRed margin-0"></p>
+                        </div>
+                        <div class="col-xs-4">
+                            <p class="margin-0">Carbs: </p>
+                            <p class="carbsOrange margin-0"></p>
+                        </div>
+                        <div class="col-xs-4">
+                            <p class="margin-0">Proteins:</p>
+                            <p class="proteinsGreen margin-0"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="statsBox" class="width-full position-relative margin-top-15">
+            <div id="calorieIndex" class="height-full">
+                <ul class="list-unstyled height-full margin-0">
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0 text-center">-</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div><div id="myDopeTable" class="position-relative">
+                <div>
+                    <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>                    
+                </div><div>
+                     <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>           
+                </div><div>
+                     <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>                   
+                </div><div>
+                     <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>           
+                </div><div>
+                 <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>           
+                </div><div>
+                     <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>                               
+                </div><div>
+                 <div class="fatsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carbsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="proteinsTable">
+                        <div class="parent both-full">
+                            <div class="child">
+                                <p class="margin-0"></p>
+                                <p class="margin-0"></p>
+                            </div>
+                        </div>
+                    </div>           
+                </div>
+        </div>
+        </div>
+        <div id="xAxisDays">
+            <p>Mon<br />01</p><p>Tue<br />02</p><p>Wed<br />03</p><p>Thu<br />04</p><p>Fri<br />05</p><p>Sat<br />06</p><p>Sun<br />07</p>
+        </div>
+    </div>
+
+</div>

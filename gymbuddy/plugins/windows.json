@@ -1,0 +1,18 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-sqlite-2": {
+      "PACKAGE_NAME": "GymBuddy"
+    },
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "GymBuddy"
+    }
+  },
+  "dependent_plugins": {}
+}
