@@ -338,7 +338,7 @@ body {
         transition: all 500ms;
     }
 
-    > .animatedIn.animatedOut {
+    & > .animatedIn.animatedOut, & > #workoutsToday > .individualExercise.animatedOut {
         transition: all 250ms;
 
         &:nth-child(odd) {
@@ -899,6 +899,10 @@ body {
 
 .margin-bottom-10 {
     margin-bottom: 10px;
+}
+
+.margin-bottom-15 {
+    margin-bottom: 15px;
 }
 
 .margin-bottom-20 {
@@ -1715,6 +1719,14 @@ input#exerciseList {
     background: fade(@white, 90%);
     padding-top: 10px;
 
+    &:nth-child(even){
+        right: 0%;
+    }
+
+    &:nth-child(odd){
+        left: 0%;
+    }
+
     .workoutHeader {
         .boxShadow();
         margin: 0;
@@ -1827,7 +1839,7 @@ input#exerciseList {
                 & > div {
                     flex: 1;
                     height: 100%;
-                    padding-right: 32px;
+                    margin-right: 32px;
                     position: relative;
 
                     &::before {
@@ -1840,7 +1852,7 @@ input#exerciseList {
                         font-size: 10px;
                         height: 11px;
                         line-height: 11px;
-                        width: calc(100% - 32px);
+                        width: 100%;
                         border-radius: 10px 10px 0px 0px;
                         text-align: center;
                         font-weight: 300;
@@ -1870,15 +1882,58 @@ input#exerciseList {
 
     .workoutContent[data-empty="false"] {
         .addSet {
-            width: 70%;
-            margin-left: 30%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-content: center;
+
+            & > * {
+                flex: 1;
+            }
+
+            .totalVolume {
+                text-align: center;
+                position: relative;
+                .boxShadow(0px, 0px, 4px, 0.25);
+                max-width: 150px;
+                margin-bottom: 13px;
+
+                &::before {
+                    content: 'TOTAL VOLUME';
+                    font-weight: 300;
+                    background-color: @gold;
+                    border-radius: 0px 0px 10px 10px;
+                    font-size: 12px;
+                    line-height: 12px;
+                    height: 13px;
+                    position: absolute;
+                    bottom: -13px;
+                    left: 0;
+                    width: 100%;
+                    color: @white;
+                }
+
+                p {
+                    background-color: @white;
+                    font-size: 20px;
+                    line-height: 30px;
+                    height: 30px;
+                    width: 100%;
+                    margin: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    font-weight: 300;
+
+                    span {
+                        font-weight: 300;
+                    }
+                }
+            }
         }
     }
 
     .workoutContent[data-empty="true"] {
         .addSet {
-            padding: 10px;
-
             .noSets {
                 display: block;
                 width: 100%;
@@ -1894,14 +1949,23 @@ input#exerciseList {
     .addSet {
         margin: 0;
         text-align: center;
+        padding: 10px;
 
-        span {
+        span.addSetBtn {
+            position: relative;
             color: @gold;
             font-size: 36px;
             background-color: @white;
             padding: 0px 2px;
             border-radius: 5px;
-            .boxShadow(0px, 4px, 4px);
+            top: 0px;
+            transition: all 200ms;
+            .boxShadow(0px, 4px, 4px, 0.2, false);
+
+            &:hover, &:focus, &:active {
+                top: 2px;
+                .boxShadow(0px, 0px, 4px, 0.3, false);
+            }
         }
     }
 
@@ -1970,49 +2034,6 @@ input#exerciseList {
             margin: 0;
             text-align: center;
             transition: color 300ms;
-        }
-    }
-
-    .totalVolume {
-        width: 70%;
-        margin-left: 30%;
-        border-top: 1px dashed #a59fa1;
-        text-align: center;
-        padding-top: 5px;
-        margin-top: 15px;
-
-        p {
-            margin: 0;
-            width: 100%;
-            position: relative;
-            margin-top: 15px;
-
-            &::before {
-                content: 'TOTAL VOLUME';
-                display: block;
-                position: absolute;
-                top: -15px;
-                left: 0;
-                right: 0;
-                width: 100%;
-                text-align: center;
-                font-size: 15px;
-            }
-
-            span {
-                font-size: 22px;
-                font-weight: bold;
-            }
-
-            &::after {
-                content: '(total volume)';
-                display: block;
-                font-weight: 100;
-                margin: 0;
-                line-height: 10px;
-                margin-bottom: 15px;
-                font-size: 15px;
-            }
         }
     }
 }

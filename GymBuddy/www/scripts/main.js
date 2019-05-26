@@ -148,7 +148,13 @@ function loadContent(what) {//initializes one part of the app vs the other
         }
     } else {
         $("#pushContent").children("div").each(function (i, e) {
-            $(e).addClass("animatedOut");
+            if ($(this).attr("id") == "workoutsToday"){
+                $(this).children("div").each(function (ii, ee) {
+                    $(ee).addClass("animatedOut");
+                });
+            } else {
+                $(e).addClass("animatedOut");
+            }
         });
         setTimeout(function () {
             $("#body").empty().append(_originalBodyContent.replace("parent both-full", "parent opacity-0 both-full"));
@@ -158,7 +164,6 @@ function loadContent(what) {//initializes one part of the app vs the other
             localStorage.removeItem("lastOpened");
         }, 300);
     }
-
 }
 function pushTopAnimation(element, what) {
     var delay = 0; //regardless of how many children div, all will animate
@@ -1153,10 +1158,10 @@ function loadWorkoutsForToday() {
                     ` + (singleExercise.set.length == 0 ? "" : "#SETS#") + `
                     <!-- last div of type set have border bottom and data-attribute for total weight -->
                     <div class="addSet">
-                        <span data-array-index='`+ indexCounter + `' data-id='` + singleExercise.exerciseID + `'  class="addSetBtn fas fa-plus-square"></span>
-                        `+ (singleExercise.set.length == 0 ? '<p class="noSets">No sets added yet.</p>' : "") + `                    
+                        <div>` + (singleExercise.set.length == 0 ? "" : "#TOTALVOLUME#") + `</div>                
+                        <div><span data-array-index='`+ indexCounter + `' data-id='` + singleExercise.exerciseID + `'  class="addSetBtn fas fa-plus-square"></span>
+                        `+ (singleExercise.set.length == 0 ? '<p class="noSets">No sets added yet.</p>' : "") + `</div>                    
                     </div>
-                    ` + (singleExercise.set.length == 0 ? "" : "#TOTALVOLUME#") + `
                     <hr class='fancySeparator'>
                     <div class='workoutHistory'>
                         <hr class='fancySeparator'>              
@@ -1528,7 +1533,7 @@ $(document).on("click", ".optionCategory", function () {
 });
 
 //Hold optionCategory for edit
-var holdTimer;
+var holdTimer = null;
 $(document).on("mousedown touchstart", ".optionCategory[data-editing-enabled='true']", function () {
     holdTimer = window.setTimeout(() => { //arrow function in ES6 does not follow normal function scope rules, it goes to its parent's scope for its this
         editOptionCategory($(this).data("category"));
@@ -1542,8 +1547,10 @@ $(document).on("mousedown touchstart", ".workoutEntry", function () {
 });
 
 $(document).on("mouseup touchend", ".optionCategory[data-editing-enabled='true'], .workoutEntry, .favoriteEntry, .set", function () {
-    if (holdTimer)
+    if (holdTimer) {
         window.clearTimeout(holdTimer);
+        holdTimer = null;
+    }
 });
 
 function editOptionCategory(categoryObj) {
